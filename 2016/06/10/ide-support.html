@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IDE support - Bazel</title>
+
+    <link rel="canonical" href="/2016/06/10/ide-support.html">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="IDE support">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          <div class="blog-post">
+            <h1 class="blog-post-title">IDE support</h1>
+            <div class="blog-post-meta">
+              
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/dslomov">Dmitry Lomov</a>
+  
+  
+
+
+on <span class="text-muted">10 June 2016</span>
+
+            </div>
+            <div class="blog-post-content">
+              <p>One of Bazel’s longest-standing feature requests is integration with IDEs.
+With the 0.3 release, we finally have all machinery in place that allows
+implementing integration with Bazel in IDEs. Simultaneous with that
+Bazel release we are also making public two IDE plugins:</p>
+
+<ul>
+<li>  <a href="http://tulsi.bazel.build">Tulsi</a>: Bazel support for Xcode.</li>
+<li>  <a href="https://github.com/bazelbuild/e4b">e4b</a>: a sample Bazel plugin for Eclipse.</li>
+</ul>
+
+<p>In this post, we will look into how Bazel enables IDE integration
+and how an IDE plugin integrating with Bazel can be implemented.</p>
+
+<h2>Principles of Bazel IDE support</h2>
+
+<p>Bazel BUILD files provide a description of a project’s source code: what
+source files are part of the project, what artifacts (targets) should be
+built from those files, what the dependencies between those files are, etc.
+Bazel uses this information to perform a build, that is, it figures out the set
+of actions needed to produce the artifacts (such as running a compiler or
+linker) and executes those actions. Bazel accomplishes this by constructing a
+<em>dependency graph</em> between targets and visiting this graph to collect
+those actions.</p>
+
+<p>IDEs (as well as other tools working with source code) also need the same
+information about the set of sources and their roles; but instead of building
+the artifacts, IDEs use it to provide code navigation, autocompletion and
+other code-aware features.</p>
+
+<p>In the 0.3.0 Bazel release, we are adding a new concept to Bazel -
+<a href="https://docs.bazel.build/skylark/aspects.html"><em>aspects</em></a>.
+Aspects allow augmenting build dependency graphs with additional information
+and actions. Applying an aspect to a build target creates a &quot;shadow
+dependency graph&quot; reflecting all transitive dependencies of that target,
+and the aspect&#39;s implementation determines the actions that Bazel executes
+while traversing that graph.
+The <a href="https://docs.bazel.build/skylark/aspects.html">documentation on aspects</a> explains this in more
+detail.</p>
+
+<h2>Architecture of a Bazel IDE plugin.</h2>
+
+<p>As an example of how aspects are useful for IDE integration, we will take
+a look at a sample
+<a href="https://github.com/bazelbuild/e4b">Eclipse plugin for Bazel support, e4b</a>.</p>
+
+<p>e4b includes an aspect, defined in a file
+<a href="https://github.com/bazelbuild/e4b/blob/master/com.google.devtools.bazel.e4b/resources/tools/must/be/unique/e4b_aspect.bzl"><code>e4b_aspect.bzl</code></a>,
+that when
+applied to a particular target, generates a small JSON file with information
+about that target relevant to Eclipse. Those JSON files are then consumed
+by the e4b plugin inside Eclipse to build <a href="https://github.com/bazelbuild/e4b/blob/master/com.google.devtools.bazel.e4b/src/com/google/devtools/bazel/e4b/classpath/BazelClasspathContainer.java">Eclipse&#39;s representation
+of a project</a>,
+<a href="http://help.eclipse.org/juno/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FIClasspathContainer.html"><code>IClasspathContainer</code></a>:</p>
+
+<p><img src="/assets/e4b-workflow.png" alt="e4bazel workflow"></p>
+
+<p>Through the e4b plugin UI, the user specifies an initial set of targets
+(typically a java or android binary, a selection of tests, all targets
+in certain packages, etc). E4b plugin then invokes bazel as follows:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">bazel build //java/com/company/example:main \
+--aspects e4b_aspect.bzl%e4b_aspect \
+--output_groups ide-info
+</code></pre></div>
+<p>(some details are omitted for clarity; see
+<a href="https://github.com/bazelbuild/e4b/blob/master/com.google.devtools.bazel.e4b/src/com/google/devtools/bazel/e4b/command/BazelCommand.java">e4b source</a> for complete
+invocation)</p>
+
+<p>The <code>--aspects</code> flag directs Bazel to apply <code>e4b_aspect</code>, exported from
+<code>e4bazel.bzl</code> Skylark extension, to target <code>//java/com/company/example:main</code>.</p>
+
+<p>The aspect is then applied transitively to the dependencies of the specified
+targets, producing <code>.e4b-build.json</code> files for each target in the transitive
+closure of dependencies. The e4b plugin reads those outputs and provides
+a Classpath for Eclipse core to consume. If the input BUILD files change
+so that a project model needs to be re-synced, the plugin still invokes
+the exact same command: Bazel will rebuild only those files that are affected
+by the change, so the plugin need only reexamine only those newly built
+<code>.e4b-build.json</code> files. <code>ide-info</code> is an output group defined by e4b_aspect;
+the <code>--output_groups</code> flag ensures that only the artifacts belonging to that
+group (and hence only to the aspect) are built, and therefore that no
+unnecessary build steps are performed.</p>
+
+<p>The aspect uses the
+<a href="https://docs.bazel.build/skylark/lib/JavaSkylarkApiProvider.html"><code>java</code> provider</a> on the targets
+it applies to to access a variety of information about Java targets.</p>
+
+            </div>
+            
+          </div>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+
+    <!-- Anchor JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.0/anchor.min.js"></script>
+    <script>
+      // Automatically add anchors and links to all header elements that don't already have them.
+      anchors.add();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bazel Blog - Bazel</title>
+
+    <link rel="canonical" href="/page4/">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="Bazel Blog">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2019/02/15/introducing-aquery.html">Introducing Bazel Aquery</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/joeleba">Joe Le-Ba</a>
+  
+  
+
+
+on <span class="text-muted">15 February 2019</span>
+
+    </span>
+  </div>
+
+  <p>tl;dr: bazel aquery is a new bazel command that queries the action graph, and thus allows you to gain insights about the actions executed in a build (inputs, outputs, command line, …).
+aquery’s API is now stable and supported by the Bazel team.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2019/02/15/introducing-aquery.html">Continue reading
+        
+        (about 6 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2019/02/11/configurable-builds-part-1.html">Configurable Builds - Part 1</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/gregestren">Greg Estren</a>
+  
+  
+
+
+on <span class="text-muted">11 February 2019</span>
+
+    </span>
+  </div>
+
+  <p>One of Bazel&#39;s long-term goals is to make $ bazel build //:all &quot;just work&quot;
+so that every target builds &quot;the right way&quot;, for whatever platform(s) you care
+about, using only flags that are genuinely interesting to you. This two-part
+series discusses the challenges involved and steps we&#39;re taking to get there.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2019/02/11/configurable-builds-part-1.html">Continue reading
+        
+        (about 9 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2019/02/01/dynamic-spawn-scheduler.html">Dynamic scheduling for faster builds</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="http://julio.meroh.net/">Julio Merino</a>
+  
+  
+    and
+  
+
+  
+  
+
+  
+    <a href="https://github.com/jin">Jingwen Chen</a>
+  
+  
+
+
+on <span class="text-muted">01 February 2019</span>
+
+    </span>
+  </div>
+
+  <p>The recently-released Bazel 0.21 brings an experimental new feature that can make your builds faster by making use of remote and local resources transparently. Prior to this release, this was already doable to some extent by using manual strategy definitions, but this new feature takes all manual decisions out of the picture.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2019/02/01/dynamic-spawn-scheduler.html">Continue reading
+        
+        (about 8 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2019/01/28/bazel-0.22.0.html">Bazel 0.22</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/aehlig">Klaus Aehlig</a>
+  
+  
+
+
+on <span class="text-muted">28 January 2019</span>
+
+    </span>
+  </div>
+
+  <p>The Bazel team is happy to announce a new version of Bazel, Bazel 0.22.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2019/01/28/bazel-0.22.0.html">Continue reading
+        
+        (about 2 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2018/12/19/bazel-0.21.html">Bazel 0.21</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/laurentlb">Laurent Le Brun</a>
+  
+  
+
+
+on <span class="text-muted">19 December 2018</span>
+
+    </span>
+  </div>
+
+  <p>We&#39;ve just released Bazel 0.21!
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2018/12/19/bazel-0.21.html">Continue reading
+        
+        (about 4 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2018/12/14/Bazel-0.20.0.html">Bazel 0.20</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/dslomov">Dmitry Lomov</a>
+  
+  
+
+
+on <span class="text-muted">14 December 2018</span>
+
+    </span>
+  </div>
+
+  <p>The Bazel team is happy to announce a new version of Bazel, Bazel 0.20.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2018/12/14/Bazel-0.20.0.html">Continue reading
+        
+        (about 3 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2018/12/05/multilanguage-build-system.html">Bazel - a multi-language build system</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/laurentlb">Laurent Le Brun</a>
+  
+  
+
+
+on <span class="text-muted">05 December 2018</span>
+
+    </span>
+  </div>
+
+  <p>Part of Bazel vision
+is to create a multi-language build system: it should be possible to seamlessly
+use and mix multiple languages in a codebase and to orchestrate builds and
+tests with a single build tool. As a codebase gets bigger, this feature
+becomes more and more important.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2018/12/05/multilanguage-build-system.html">Continue reading
+        
+        (about 2 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2018/11/02/bazelcon-2018-recap.html">BazelCon 2018 Recap: presentation videos are up!</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/davidstanke">David Stanke</a>
+  
+  
+
+
+on <span class="text-muted">02 November 2018</span>
+
+    </span>
+  </div>
+
+  <p>Thank you to everyone who made BazelCon 2018 a success! Over 300 attendees, representing over 100 organizations, spent two packed days sharing experiences and envisioning the future of Bazel. 80+ users took advantage of Office Hours to get hands-on help with Bazel and Remote Build Execution. And 40+ people received an immersive introduction to Bazel at Boot Camp.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2018/11/02/bazelcon-2018-recap.html">Continue reading
+        
+        (about 1 minute)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2018/10/29/bazel-0.19.0.html">Bazel 0.19</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    
+    katre
+  
+  
+
+
+on <span class="text-muted">29 October 2018</span>
+
+    </span>
+  </div>
+
+  <p>The Bazel team is happy to announce a new version of Bazel, Bazel 0.19.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2018/10/29/bazel-0.19.0.html">Continue reading
+        
+        (about 2 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+<div class="blog-post">
+  <h1 class="blog-post-title"><a href="/2018/10/22/hackathon.html">Bazel Hackathon 2018</a></h1>
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/edbaunton">Ed Baunton</a>
+  
+  
+
+
+on <span class="text-muted">22 October 2018</span>
+
+    </span>
+  </div>
+
+  <p>The day after this year’s BazelCon at Google New York, Bloomberg hosted 35+ attendees at its Global Headquarters for a day of hacking on all things Bazel, Remote Execution and Remote Worker API.
+</p>
+
+  
+  
+  
+
+  <div class="blog-post-meta">
+    <span class="text-muted">
+      <a href="/2018/10/22/hackathon.html">Continue reading
+        
+        (about 3 minutes)
+        
+      </a>
+	  
+    </span>
+  </div>
+</div>
+
+
+
+
+
+
+          <nav aria-label="...">
+            <ul class="pager">
+              
+              <li class="previous">
+                <a href="/page3">
+                  <span aria-hidden="true">&larr;</span> Newer
+                </a>
+              </li>
+              
+
+              
+              <li class="next">
+                <a href="/page5">
+                  Older <span aria-hidden="true">&rarr;</span>
+                </a>
+              </li>
+              
+            </ul>
+          </nav>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+  </body>
+</html>

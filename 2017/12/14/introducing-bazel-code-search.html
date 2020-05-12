@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Introducing Bazel Code Search - Bazel</title>
+
+    <link rel="canonical" href="/2017/12/14/introducing-bazel-code-search.html">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="Introducing Bazel Code Search">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          <div class="blog-post">
+            <h1 class="blog-post-title">Introducing Bazel Code Search</h1>
+            <div class="blog-post-meta">
+              
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/russwolf">Russell Wolf</a>
+  
+  
+
+
+on <span class="text-muted">14 December 2017</span>
+
+            </div>
+            <div class="blog-post-content">
+              <p>We are always looking for new ways to improve the experience of contributing to Bazel and helping users understanding how Bazel works. Today, we’re excited to share a preview of <a href="https://source.bazel.build">Bazel Code Search</a>, a major upgrade to Bazel’s code search site. This new site features a <a href="#browsing-through-bazel-repositories">refreshed user interface for code browsing</a> and cross-repository <a href="#searching-the-bazel-codebase">semantic search</a> with regular expression support, and a <a href="#understanding-the-bazel-codebase-using-cross-references">navigable semantic index</a> of all definitions and references for the Bazel codebase. We’ve also updated the “Contribute” page on the Bazel website with <a href="https://bazel.build/browse-and-search-user-guide.html">documentation for this tool</a>. </p>
+
+<h1>Getting started with Bazel Code Search</h1>
+
+<p>You can try Bazel Code Search right now by visiting <a href="https://source.bazel.build">https://source.bazel.build</a>. </p>
+
+<p>Select the repository you want to browse from the list on the main screen, or search across all Bazel repositories on the site using the search box at the top of the page. </p>
+
+<p><img src="/assets/bazel-code-search-main-screen.png" alt="Main screen of Bazel Code Search"></p>
+
+<p><a id="searching-the-bazel-codebase"></a> </p>
+
+<h2>Searching the Bazel codebase</h2>
+
+<p>Bazel Code Search has a semantic understanding of the Bazel codebase and allows you to <a href="https://bazel.build/browse-and-search-user-guide.html#search">search for either files or code within files</a>. This semantic understanding of the code means that the search index identifies which parts of your code are entities such as classes, functions, and fields.  Since the search index has classified these entities, your queries can include filters to <a href="https://bazel.build/browse-and-search-user-guide.html#search">scope the search to classes or functions</a> and allows for improved search relevance by ranking important parts of code like classes, functions, and fields higher. By default, all searches use <a href="https://github.com/google/re2/wiki/Syntax">RE2 regular expressions</a> though you can escape individual special characters with a backslash, or an entire string by enclosing it in quotes. </p>
+
+<p>To search, start typing in the search box at the top of the screen and you’ll see suggestions for matching results. For Java, JavaScript, and Proto, result suggestions indicate if the match is an entity such as a Class, Method, Enum or Field. Semantic understanding for more languages is on the way. </p>
+
+<p><img src="/assets/bazel-code-search-suggestions.png" alt="Bazel code search suggestions"></p>
+
+<p>If you don’t see the result you want in the suggestions, you can submit your search and find all matches on the search result page. From the results page, you can select a matching line or file to view. </p>
+
+<p>Here’s a sampling of different search examples to try out on your own: </p>
+
+<ul>
+<li><a href="https://source.bazel.build/search?q=ccToolchain">ccToolchain</a>
+
+<ul>
+<li>search for the substring “ccToolchain”</li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=class%20ccToolchain">class ccToolchain</a>
+
+<ul>
+<li>search for files containing both “class” and “ccToolchain” substrings</li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=%22class%20ccToolchain%22">“class ccToolchain”</a>
+
+<ul>
+<li>search for files containing the phrase “class ccToolchain” </li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=class:ccToolchain">class:ccToolchain</a>
+
+<ul>
+<li>search for classes where the name of a class contains the substring “ccToolchain”</li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=file:cpp%20ccToolchain">file:cpp ccToolchain</a>
+
+<ul>
+<li>search for files containing the substring “ccToolchain” where “cpp” is in the file path </li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=file:cpp%20lang:java%20ccToolchain">file:cpp lang:java ccToolchain</a>
+
+<ul>
+<li>search for Java files containing the substring “ccToolchain” where “cpp” is in the file path</li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=aggre.*test">aggre.*test</a>
+
+<ul>
+<li>search for the regular expression “aggre.*test”</li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=ccToolchain%20-test">ccToolchain -test</a>
+
+<ul>
+<li>search for the substring “ccToolchain” excluding any files containing the substring “test”</li>
+</ul></li>
+<li><a href="https://source.bazel.build/search?q=cTool%20case:yes">cTool case:yes</a>
+
+<ul>
+<li>search for the substring “cTool” (case sensitive)</li>
+</ul></li>
+</ul>
+
+<p>Note that all searches are case insensitive unless you specify “case:yes” in the query. </p>
+
+<p><a id="understanding-the-bazel-codebase-using-cross-references"></a> </p>
+
+<h2>Understanding the Bazel codebase using cross references</h2>
+
+<p>Another way to understand the Bazel repository is through the use of <a href="https://bazel.build/browse-and-search-user-guide.html#browsing-cross-references">cross references</a>. If you’ve ever wondered how to properly use a method, cross references can help by displaying all references to that method so you can see how it is used in other parts of the codebase. Alternatively, if you see a method being used but don’t understand what that method actually does, cross references enables you to click the method to view the definition or see how it’s used elsewhere. </p>
+
+<p><img src="/assets/bazel-code-search-xref-pane.png" alt="Cross references pane"></p>
+
+<p>Cross references aren’t only available for methods, they’re also generated for classes, fields, imports, and enums. Bazel Code Search uses the <a href="https://kythe.io/docs/kythe-overview.html">Kythe</a> open source project to generate a semantic index of cross references for the Bazel codebase. These cross references appear automatically as hyperlinks within source files. To make cross references easier to identify, click the <strong>Cross References</strong> button to underline all cross references in a file. </p>
+
+<p><img src="/assets/bazel-code-search-xref-underlined.png" alt="Cross references underlined"></p>
+
+<p>Once you’ve clicked on a cross reference, the cross references pane will be displayed where you can view all the definitions and references organized by file. Within the cross references pane, you can navigate into multiple levels of depth of cross references while continuing to view the original file you were viewing in the File pane allowing you to maintain context of the original task. </p>
+
+<p><img src="/assets/bazel-code-search-xref-levels.png" alt="Navigating through levels of cross references"></p>
+
+<p><a id="browsing-through-bazel-repositories"></a> </p>
+
+<h2>Browsing through Bazel repositories</h2>
+
+<p>Selecting a repository from the main screen will take you to a view of the chosen repository with search scoped to its contents. The breadcrumb toolbar at the top allows you to quickly navigate to other <a href="https://bazel.build/browse-and-search-user-guide.html#switch-repositories">repositories</a>, <a href="https://bazel.build/browse-and-search-user-guide.html#open-a-branch-commit-or-tag">refs</a>, or folders. </p>
+
+<p><img src="/assets/bazel-code-search-repo-view.png" alt="Repository view on Bazel Code Search"></p>
+
+<p>From the view of the repository, you can browse through folders and files in the repository while taking advantage of <a href="https://bazel.build/browse-and-search-user-guide.html#view-file-changes">blame</a>, <a href="https://bazel.build/browse-and-search-user-guide.html#view-change-history">change history</a>, a <a href="https://bazel.build/browse-and-search-user-guide.html#compare-a-file-to-a-different-commit">diff view</a> and many other features. </p>
+
+<p><img src="/assets/bazel-code-search-file-view.png" alt="Bazel Code Search File View showing Blame and History"></p>
+
+<h1>Give Feedback</h1>
+
+<p>We hope you’ll try <a href="https://source.bazel.build">Bazel Code Search</a> and provide feedback through the “<strong>!</strong>” button in the top right of any page on the Bazel Code Search site. We would love to hear whether this tool helps you work with Bazel and what else you’d like to see Bazel Code Search offer. </p>
+
+<p>Keep in mind that this project is still experimental and is subject to change.</p>
+
+            </div>
+            
+          </div>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+
+    <!-- Anchor JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.0/anchor.min.js"></script>
+    <script>
+      // Automatically add anchors and links to all header elements that don't already have them.
+      anchors.add();
+    </script>
+  </body>
+</html>

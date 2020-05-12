@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Preliminary sandboxfs support and performance results - Bazel</title>
+
+    <link rel="canonical" href="/2018/04/13/preliminary-sandboxfs-support.html">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="Preliminary sandboxfs support and performance results">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          <div class="blog-post">
+            <h1 class="blog-post-title">Preliminary sandboxfs support and performance results</h1>
+            <div class="blog-post-meta">
+              
+
+By
+
+
+
+  
+  
+
+  
+    <a href="http://julio.meroh.net/">Julio Merino</a>
+  
+  
+
+
+on <span class="text-muted">13 April 2018</span>
+
+            </div>
+            <div class="blog-post-content">
+              <p><a href="/2017/08/25/introducing-sandboxfs.html">Back in August of 2017</a>, we
+introduced sandboxfs: a project to improve the performance and correctness of
+builds that have action sandboxing enabled. Today, after months of work to
+stabilize the codebase, we are happy to announce that preliminary support for
+sandboxfs is available in Bazel HEAD after April 13th!</p>
+
+<p>This post presents the performance measurements we have gotten so far when using
+sandboxfs. As these metrics look promising, the true goal of this post is a
+<strong>call for action</strong>: we know a bunch of you have previously expressed that
+sandboxing was unusable due to its overhead so we want to know if sandboxfs
+makes things better for you.</p>
+
+<h2>Sandboxing basics</h2>
+
+<p>Before delving into the details, let&#39;s quickly recap what action sandboxing is
+and how sandboxfs is supposed to benefit it. (Refer to <a href="/2017/08/25/introducing-sandboxfs.html">the previous post</a> for a much more detailed
+explanation.)</p>
+
+<p><strong>Sandboxing</strong> is Bazel&#39;s ability to isolate the execution of each build action
+(think &quot;compiler invocation&quot;) from the rest of the system. This feature
+restricts what actions can do so that they only have access to the tools and
+inputs they declare and so that they are only able to write the outputs they
+promised. In this way, we ensure that the build graph doesn&#39;t have hidden
+dependencies that could poison the reproducibility of the build.</p>
+
+<p>More specifically, Bazel constructs an <strong>execroot</strong> for each action, which acts
+as the action&#39;s work directory at execution time. The execroot contains all
+input files to the action and serves as the container for any generated outputs.
+Bazel then uses an operating system-provided technique—containers on Linux and
+<code>sandbox-exec</code> on macOS—to constrain the action within the execroot. It is worth
+noting that the preparation of the disk layout and the actual sandboxing are
+orthogonal.</p>
+
+<p>Traditionally, Bazel has been creating the execroot using symlinks, thus
+creation scales linearly with the number of inputs. Creating all these symlinks
+is costly for actions with thousands of inputs and unfortunately these are not
+uncommon. This is where sandboxfs is supposed to help.</p>
+
+<p><strong>sandboxfs</strong> is a FUSE file system that exposes an arbitrary view of the
+underlying file system and does so without time penalties. Bazel can then use
+sandboxfs to generate the execroot &quot;instantaneously&quot; for each action, avoiding
+the cost of issuing thousands of system calls. The downside is that all further
+I/O within the execroot is slower due to FUSE overhead. We hypothesized that
+this was a tradeoff with potentials for time savings and we are at a point where
+we can prove it. Let&#39;s see how this has played out so far.</p>
+
+<h2>Performance results</h2>
+
+<p>The experiments below were run under the following build machines:</p>
+
+<ul>
+<li>  MacBook Pro 2016: Intel Core i7-6567U CPU @ 3.30GHz, 2 cores, 16GB RAM, SSD.</li>
+<li>  Mac Pro 2013: Intel Xeon CPU E5-1650 v2 @ 3.50GHz, 6 cores, 32GB RAM, SSD.</li>
+<li>  Linux workstation: Intel Xeon CPU E5-2699 v3 @ 2.30GHz, 6 cores, 32GB RAM,
+SSD.</li>
+</ul>
+
+<p>And here are the specific build times obtained from a variety of different
+targets. All these builds were clean builds, and each was run 10 times and
+averaged to minimize noise:</p>
+
+<table><thead>
+<tr>
+<th>ID</th>
+<th>Target</th>
+<th>Machine</th>
+<th>No sandbox</th>
+<th>Symlinked sandbox</th>
+<th>sandboxfs sandbox</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><strong>BL</strong></td>
+<td>Bazel</td>
+<td>MacBook Pro 2017</td>
+<td>581 sec</td>
+<td>621 sec (+6%)</td>
+<td>612 sec (+5%)</td>
+</tr>
+<tr>
+<td><strong>BW</strong></td>
+<td>Bazel</td>
+<td>Mac Pro 2013</td>
+<td>247 sec</td>
+<td>265 sec (+7%)</td>
+<td>250 sec (+1%)</td>
+</tr>
+<tr>
+<td><strong>IW</strong></td>
+<td>iOS app</td>
+<td>Mac Pro 2013</td>
+<td>1235 sec</td>
+<td>4572 sec (+270%)</td>
+<td>1922 sec (+55%)</td>
+</tr>
+<tr>
+<td><strong>CW</strong></td>
+<td>C++/Go library</td>
+<td>Linux workstation</td>
+<td>1175 sec</td>
+<td>1318 sec (+12%)</td>
+<td>828 sec (-30%)</td>
+</tr>
+</tbody></table>
+
+<p>Let&#39;s ignore the strange <strong>CW</strong> build results for a moment.</p>
+
+<p>As you can see from all builds, sandboxfs-based builds are strictly better than
+symlinks-based builds. The cost of sandboxing, however, varies widely depending
+on what&#39;s being built and on what machine. For <strong>BL</strong> and <strong>BW</strong>, the cost of
+sandboxing is small enough to think that using sandboxing unconditionally is
+possible. For <strong>IW</strong>, however, the cost of sandboxing is significant in either
+case. That said, for <strong>IW</strong> we see the massive time savings of the
+sandboxfs-based approach, and this (slow iOS builds) is the specific case we set
+to fix at the beginning of the sandboxfs project.</p>
+
+<p>These results are optimistic but we have also observed cases where sandboxfs
+builds are slower than symlinked builds. I wasn&#39;t able to reproduce those when
+preparing this blog post but be aware that it&#39;s entirely possible for you to
+observe slower builds when using sandboxfs. We have some work to do before we
+can gain more confidence on this.</p>
+
+<p>Now, what&#39;s up with <strong>CW</strong>? Note that sandboxfs-based builds are <em>faster</em> than
+without sandboxing. This makes little sense: how can it possibly be that doing
+<em>more</em> work results in a faster build? We don&#39;t really know yet, but the
+measurements were pretty conclusive. One possible explanation is that using
+sandboxfs to expose the sources of the actions somehow reduces contention on
+srcfsd (the other FUSE file system we use in our builds, which exposes the
+monolithic Google repository) and makes its overall behavior faster.</p>
+
+<h2>Usage instructions</h2>
+
+<p>Convinced that you should give this a try? Excellent. Use the following steps to
+install sandboxfs and perform a Bazel build with it. Be aware that due to the
+current status of sandboxfs (no formal releases), these may change at any time.</p>
+
+<ol>
+<li><p>Ensure you are using a Bazel build newer than April 13th or wait for the
+future 0.13.x release series.</p></li>
+<li><p>Download and install sandboxfs so that the <code>sandboxfs</code> binary ends up in
+your <code>PATH</code>. There currently are no formal releases for this project so you
+will have to do a <a href="https://github.com/bazelbuild/sandboxfs/blob/master/INSTALL.md">HEAD build from
+GitHub</a>
+using Bazel.</p></li>
+<li><p>(macOS-only) <a href="https://osxfuse.github.io/">Install OSXFUSE</a>.</p></li>
+<li><p>(macOS-only) Run <code>sudo sysctl -w
+vfs.generic.osxfuse.tunables.allow_other=1</code>. You will need to do this after
+installation and after every reboot. This is unfortunately <a href="http://julio.meroh.net/2017/10/fighting-execs-sandboxfs-macos.html">necessary to
+ensure core macOS system services
+work</a>
+through sandboxfs.</p></li>
+<li><p>Run your favorite Bazel build with <code>--experimental_use_sandboxfs</code>.</p></li>
+</ol>
+
+<p>That&#39;s it!</p>
+
+<p>If you see <code>local</code> instead of <code>darwin-sandbox</code> or <code>linux-sandbox</code> as an
+annotation for the actions that are executed, this may mean that sandboxing is
+disabled. Pass <code>--genrule_strategy=sandboxed --spawn_strategy=sandboxed</code> to
+enable it.</p>
+
+<h2>Next steps</h2>
+
+<p>We cannot yet recommend using sandboxfs by default nor we can&#39;t convince you yet
+to enable sandboxing unconditionally due to its non-zero cost. But the current
+status may be sufficient for you to enable sandboxing in some cases
+(<em>especially</em> during release builds if you are not doing so yet).</p>
+
+<p>Here are some things we are planning to look into:</p>
+
+<ul>
+<li><p>Further investigate what can be optimized within sandboxfs. Some preliminary
+profiling routinely points at the CPU being spent in the Go runtime so it&#39;s
+unclear if fixes will be easy/possible. (Due to personal curiosity, I&#39;ve
+been prototyping a reimplementation in Rust and have a feeling that it can
+significantly cut down CPU usage in sandboxfs.)</p></li>
+<li><p>We know that symlinked sandboxing is faster than sandboxfs in some cases.
+Investigate what the cutoff point is (as a number of action inputs, or
+something else) and implement a mode where we only use sandboxfs in the
+cases where we know it will help most.</p></li>
+<li><p>Improve the protocol between sandboxfs and Bazel so that we are confident in
+making a first release of sandboxfs for easier distribution. If we had
+binary releases, we could even bundle OSXFUSE within the image we ship so
+that you didn&#39;t need to mess with <code>sysctl</code>, for example.</p></li>
+<li><p>Pie-in-the-sky idea: reimplement sandboxfs as a kernel module. This is
+really the only way to make sandboxing overhead minimal, but is also the
+hardest to maintain. On the bright side, note that sandboxfs (excluding
+tests) is only about 1200 lines and that the tests and Bazel integration are
+fully reusable for any implementation—this rewrite may not be as daunting as
+it sounds.</p></li>
+</ul>
+
+<p>We know that many of you have previously raised the bad performance of
+sandboxing as a blocker for enabling it. We are very interested in knowing what
+kind of impact this has on your builds so that we can assess how important it is
+to continue working on this. Please give the instructions above a try and let us
+know how it goes! And also, let us know if you want to contribute!</p>
+
+            </div>
+            
+          </div>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+
+    <!-- Anchor JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.0/anchor.min.js"></script>
+    <script>
+      // Automatically add anchors and links to all header elements that don't already have them.
+      anchors.add();
+    </script>
+  </body>
+</html>

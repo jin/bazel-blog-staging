@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bazel 0.24 - Bazel</title>
+
+    <link rel="canonical" href="/2019/03/26/bazel-0.24.html">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="Bazel 0.24">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          <div class="blog-post">
+            <h1 class="blog-post-title">Bazel 0.24</h1>
+            <div class="blog-post-meta">
+              
+
+By
+
+
+
+  
+  
+
+  
+    
+    katre
+  
+  
+
+
+on <span class="text-muted">26 March 2019</span>
+
+            </div>
+            <div class="blog-post-content">
+              <p>Bazel 0.24.0 has arrived with an exciting mix of new features, important bug fixes, and updated documentation.</p>
+
+<p>This version of Bazel has been regression-tested against <a href="https://buildkite.com/bazel/bazel-at-head-plus-downstream/builds/867">over 50 open-source projects</a>. Want to get your open-source project on Bazel&#39;s CI to ensure that we catch any regressions or have suggestions what we should test against? Reach out to bazel-dev@googlegroups.com and we can set you up!</p>
+
+<h1>Incompatible changes</h1>
+
+<p>The following incompatible flags are now enabled by default, and will be removed in a near-term release. Before updating to Bazel 0.24, you may first check if your codebase is compatible either by running <a href="https://github.com/philwo/bazelisk"><code>bazelisk --migrate</code></a> or by building your code with Bazel
+0.23 and the following flags:</p>
+
+<ul>
+<li><a href="https://github.com/bazelbuild/bazel/issues/6942"><code>--incompatible_disable_runtimes_filegroups</code></a></li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/6826"><code>--incompatible_linkopts_in_user_link_flags</code></a></li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/6825"><code>--incompatible_dont_emit_static_libgcc</code></a></li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/5831"><code>--incompatible_disallow_filetype</code></a></li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/6461"><code>--incompatible_disallow_dict_plus</code></a></li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/5822"><code>--incompatible_disallow_old_style_args_add</code></a></li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7425"><code>--incompatible_java_coverage</code></a></li>
+</ul>
+
+<p>The following new incompatible flags have been added in this release. Projects are expected to begin migration:</p>
+
+<ul>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7480"><code>--incompatible_list_based_execution_strategy_selection</code></a>: Migration to a new style of specifying  execution strategy selection and fallback behavior.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7454"><code>--incompatible_windows_style_arg_escaping</code></a>: Enables correct subprocess argument escaping on Windows. (No-op on other platforms.)</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7486"><code>--incompatible_windows_escape_jvm_flags</code></a>: Enables correct <code>java_binary.jvm_flags</code> and <code>java_test.jvm_flags</code> tokenization and escaping on Windows. (No-op on other platforms.)</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7594"><code>--incompatible_disable_objc_library_resources</code></a>: Disables resource attributes in <code>objc_library</code>. Please migrate these attributes to <code>data</code> instead.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7513"><code>--incompatible_disallow_native_in_build_file</code></a>: Enable migration while removing the use of the <code>native</code> module in BUILD files.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7186"><code>--incompatible_use_toolchain_providers_in_java_common</code></a>: Cause <code>java_common</code> APIs to require <code>JavaToolchainInfo</code> and <code>JavaRuntimeInfo</code> providers instead of configured targets.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7359"><code>--incompatible_py3_is_default</code></a>: Makes targets build for Python 3 unless otherwise specified.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7593"><code>--incompatible_py2_outputs_are_suffixed</code></a>: Makes Python 3 targets’ outputs appear under the <code>bazel-bin</code> directory, and Python 2 targets’ outputs appear elsewhere.</li>
+</ul>
+
+<h1>Starlark</h1>
+
+<ul>
+<li>The <a href="https://docs.bazel.build/versions/master/skylark/lib/Args.html"><code>actions.args()</code></a> object is now chainable. Its methods now return the object itself.</li>
+<li>Rules can now safely declare attributes named &quot;licenses&quot;.</li>
+</ul>
+
+<h1>C++</h1>
+
+<ul>
+<li>The <code>is_using_fission</code> crosstool variable is now exposed in all compile actions when fission is active (it used to be exposed only for linking actions).</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/6861"><code>--incompatible_disable_legacy_crosstool_fields</code></a> will be flipped on the next release. It removes legacy fields from CROSSTOOL files. This flag was around for a few releases, and in 0.24 all the known corner cases have been fixed.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7320"><code>--incompatible_disable_crosstool_file</code></a> will be flipped on the next release. It disables loading data from CROSSTOOL files, and only uses Starlark to configure C++ toolchains.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7075"><code>--incompatible_remove_cpu_and_compiler_attributes_from_cc_toolchain</code></a> will be flipped on the next release. These attributes are unused, but cpu attribute was mandatory. This change removes them.</li>
+<li><a href="https://github.com/bazelbuild/bazel/issues/7407"><code>--incompatible_dont_enable_host_nonhost_crosstool_features</code></a> will be flipped on the next release. With it flipped, &quot;host&quot; and &quot;nonhost&quot; crosstool features are never automatically enabled by Bazel.</li>
+</ul>
+
+<h1>Android</h1>
+
+<ul>
+<li>Added support for the &quot;navigation&quot; resource directory to Android resource processing in Bazel. This is used by the <a href="https://developer.android.com/topic/libraries/architecture/navigation">Navigation Architecture Component</a>.</li>
+<li>Fixed issue where exceptions and stacktraces were silently swallowed in the Android resource processing pipeline. See <a href="https://github.com/bazelbuild/bazel/issues/7442">#7442</a>.</li>
+</ul>
+
+<h1>Apple</h1>
+
+<ul>
+<li>Added bitcode support for Apple platforms</li>
+<li>Added support for differentiating between Xcode betas</li>
+</ul>
+
+<h1>Python</h1>
+
+<ul>
+<li>Two new incompatible flags have been added to enable switching the default Python version to PY3: one to <a href="https://github.com/bazelbuild/bazel/issues/7359">make targets build for PY3</a> when not otherwise indicated, and one to help ensure that the outputs of these targets are <a href="https://github.com/bazelbuild/bazel/issues/7593">reachable from the <code>bazel-bin</code></a> directory. It is recommended to enable both flags together. (But note that until <a href="https://github.com/bazelbuild/bazel/issues/4815">#4815</a> is fixed, a <a href="https://github.com/bazelbuild/bazel/issues/4815#issuecomment-460777113">workaround</a> is needed to make Python targets launch with the correct version of the interpreter.)</li>
+<li>It is now possible to write Starlark rules that depend on or imitate <a href="https://docs.bazel.build/versions/master/be/python.html#py_runtime"><code>py_runtime</code></a>, by using the new <a href="https://docs.bazel.build/versions/master/skylark/lib/PyRuntimeInfo.html"><code>PyRuntimeInfo</code></a> provider.</li>
+<li>The <a href="https://docs.bazel.build/versions/master/be/python.html#py_runtime"><code>py_runtime</code></a> rule’s <a href="https://docs.bazel.build/versions/master/be/python.html#py_runtime.files"><code>files</code></a> attribute is no longer mandatory. It also gains a <a href="https://docs.bazel.build/versions/master/be/python.html#py_runtime.python_version"><code>python_version</code></a> attribute for specifying whether it represents a Python 2 or 3 interpreter. This new attribute will become mandatory once Python rules are updated to use the toolchain mechanism.</li>
+</ul>
+
+<h1>Other changes</h1>
+
+<ul>
+<li>We significantly reduced Bazel’s binary size, it’s now ~95MB on all platforms. We plan to reduce it even further in future releases.</li>
+<li>The  <code>//tools/cmd_line_differ</code> script has been renamed to <code>//tools/aquery_differ</code>. The script can now compare, in addition to command lines, inputs of actions given two aquery results.</li>
+<li>aquery can now query against the current state of Skyframe with <code>--skyframe_state</code>.</li>
+<li>When using the flag <a href="https://github.com/bazelbuild/bazel/issues/7480"><code>--incompatible_list_based_execution_strategy_selection</code></a>, Bazel now uses remote execution by default if you specify <code>--remote_executor</code>. Otherwise, it falls back to either persistent workers, sandboxed local execution, or and at last unsandboxed local execution, assuming the action/platform support those. The flags <code>--spawn_strategy</code> and <code>--strategy</code> continue to work as before; this only sets new defaults for the case where you don&#39;t specify these flags.</li>
+</ul>
+
+<h1>Community Updates</h1>
+
+<ul>
+<li>Ray Milkey (Member of Technical Staff, Open Networking Foundation) gave a talk to ONF Connect about <a href="https://www.youtube.com/watch?v=hpauSkts1JE">Using Bazel to Improve Build Stability</a>.</li>
+<li>Li Haoyi and Ahir Reddy wrote about <a href="https://databricks.com/blog/2019/02/27/speedy-scala-builds-with-bazel-at-databricks.html">Speedy Scala Builds with Bazel at Databricks</a>.</li>
+<li>Natan Silnitsky (Wix Engineering) wrote a second blog post on <a href="https://medium.com/wix-engineering/migrating-to-bazel-from-maven-or-gradle-be561f455c37">Migrating to Bazel from Maven or Gradle</a>.</li>
+<li>Torgeir Helgevold (Narwhal Technologies, Inc) wrote about how to <a href="https://blog.nrwl.io/dockerize-apps-with-jenkins-and-bazel-797c7964ae3b">Dockerize Apps with Jenkins and Bazel</a>.</li>
+</ul>
+
+<h1>Contributors</h1>
+
+<p>This release contains contributions from many people at Google, as well as Andrew Suffield, Brandon Lico, Chris Eason, Clint Harrison, Ed Schouten, Garrett Hopper, George Gensure, John Millikin, Keith Smiley, Ryan Beasley, Shmuel H, Travis Cline, and Vladimir Chebotarev.</p>
+
+            </div>
+            
+          </div>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+
+    <!-- Anchor JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.0/anchor.min.js"></script>
+    <script>
+      // Automatically add anchors and links to all header elements that don't already have them.
+      anchors.add();
+    </script>
+  </body>
+</html>

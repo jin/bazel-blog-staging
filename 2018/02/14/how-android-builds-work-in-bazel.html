@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>How Android Builds Work in Bazel - Bazel</title>
+
+    <link rel="canonical" href="/2018/02/14/how-android-builds-work-in-bazel.html">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="How Android Builds Work in Bazel">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          <div class="blog-post">
+            <h1 class="blog-post-title">How Android Builds Work in Bazel</h1>
+            <div class="blog-post-meta">
+              
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/asteinb">Alex Steinberg</a>
+  
+  
+
+
+on <span class="text-muted">14 February 2018</span>
+
+            </div>
+            <div class="blog-post-content">
+              <h2>Background: How Bazel Works</h2>
+
+<p>In Bazel, <code>BUILD</code> files in directories specify <strong>targets</strong> that can be built
+from the contents of those directories.</p>
+
+<p>Bazel goes through <a href="https://docs.bazel.build/versions/master/user-manual.html#phases">three
+steps</a> when
+building targets:</p>
+
+<ol>
+<li> In the <strong>loading</strong> phase, Bazel parses the <code>BUILD</code> file of the target being
+built and all <code>BUILD</code> files that file transitively depends on.</li>
+<li> In the <strong>analysis</strong> phase, Bazel builds a graph of actions needed to build
+the specified targets.</li>
+<li> In the <strong>execution</strong> phase, Bazel runs those actions.</li>
+</ol>
+
+<p>Each Bazel target is defined by a <strong>rule</strong>, which specifies inputs, outputs, and
+how to get from one to the other. Rules can specify things like creating an
+executable binary or defining a library. In Bazel’s code, individual rules are
+represented by instances of implementations of
+<a href="https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/analysis/RuleConfiguredTargetFactory.java"><code>RuleConfiguredTargetFactory</code></a>.
+Users can also extend Bazel and create new rules with
+<a href="https://docs.bazel.build/versions/master/skylark/concepts.html">Skylark</a>.</p>
+
+<p>Rules create, in turn, any number of <strong>action</strong>s. Each action takes any number
+of <strong>artifact</strong>s as inputs and produces one or more artifacts as outputs. These
+artifacts represent files that may not yet be available. They can either be
+<em>source artifacts</em>, such as source code checked in to the repository, or
+<em>generated artifacts</em>, such as output of other actions. For example, an action
+to compile a piece of code might take in source artifacts representing the code
+to be compiled and generated artifacts representing compiled dependencies, even
+though those dependencies have not yet been compiled, and output a generated
+artifact representing the compiled result. Additionally, rules may expose any
+number of <strong>provider</strong> objects. These providers are the API rules provide to
+other rules. They provide read-only information about internal state.</p>
+
+<p>During analysis, Bazel runs the rules for each target being built and their
+transitive dependencies. Each rule generates and records all the actions it
+depends on. Bazel won’t necessarily run all of those actions; if an action
+doesn’t end up being required, Bazel will just ignore it. <strong>Skyframe</strong> is used
+to evaluate and cache the results of rules.</p>
+
+<p>Information from the rules, including artifacts representing the future output
+of actions, are made available to other rules through the rules’ providers. Each
+rule has access to its direct dependencies’ providers. Because most information
+passed between rules is actually transitive, providers make use of the
+<a href="https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/collect/nestedset/NestedSet.java"><code>NestedSet</code></a>
+class, a DAG-like data structure (it’s not actually a set!) made up of items and
+pointers to other (nested) <code>NestedSet</code> objects. <code>NestedSet</code>s are specially
+optimized to work efficiently for analysis. For part of a provider that
+represents some transitive state, for example, a trivial implementation might be
+to build a new list that contains the items for the current rule and each
+transitive dependency (for a chain of n transitive dependencies, that means we’d
+add n + (n - 1) + … 1 = O(n^2) items to some list), but building a nested
+set containing the new item and a pointer to the previous nested set is much
+more efficient (we’d add 2 + 2 + … 2 = O(n) items to some nested set). This
+introduces similar efficiency in memory usage as well.</p>
+
+<p>Artifacts can each be added to any number of <strong>output groups</strong>. Each output
+group represents a different group of outputs that a user might choose to build.
+For example, the
+<a href="https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/rules/java/JavaSemantics.java#L132"><code>source_jars</code></a>
+output group specifies that Bazel should also produce the JARs of the source for
+a Java target and its transitive dependencies. The special
+<a href="https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/analysis/OutputGroupInfo.java#L113">default</a>
+output group holds output that is specifically built for a target - for example,
+building a Java binary might produce a compiled <code>.jar</code> file in the default
+output group.</p>
+
+<p>During execution, Bazel first looks at the artifacts in the requested output
+groups (plus, unless the user explicitly requested otherwise, the default output
+group). For each of those artifacts, it finds the actions that generate the
+artifact, then each of the artifacts each of those actions need, and so on until
+it finds all the actions and artifacts needed. If the action is not cached or
+the cache entry should be invalidated, Bazel follows this same process for the
+action’s dependencies, then runs the action. Once all of the actions in the
+requested output groups has been run or returned from cache, the build is
+complete.</p>
+
+<h2>Android Builds</h2>
+
+<p>There are a few important <a href="https://docs.bazel.build/versions/master/be/android.html">kinds of rules when building code for
+Android</a>:</p>
+
+<ul>
+<li>  <a href="https://docs.bazel.build/versions/master/be/android.html#android_binary"><code>android_binary</code></a>
+rules build Android packages (<code>.apk</code> files)</li>
+<li>  <a href="https://docs.bazel.build/versions/master/be/android.html#android_library"><code>android_library</code></a>
+rules build individual libraries that binaries and other libraries can
+consume.</li>
+<li>  <a href="https://docs.bazel.build/versions/master/be/android.html#android_local_test"><code>android_local_test</code></a>
+rules run test on Android code in a JVM.</li>
+<li>  <a href="https://docs.bazel.build/versions/master/be/android.html#aar_import"><code>aar_import</code></a>
+rules import <code>.aar</code> libraries built outside of Bazel into a Bazel target.</li>
+</ul>
+
+<h2>Android Resources</h2>
+
+<p>One way in which the Android library build process differs from the normal Java
+build process is Android
+<a href="https://developer.android.com/guide/topics/resources/index.html"><strong>resources</strong></a>.
+Resources are anything that’s not code - strings, images, layouts, and <a href="https://developer.android.com/guide/topics/resources/providing-resources.html#ResourceTypes">so
+on</a>.</p>
+
+<p>Bazel generates <strong><code>R.java</code></strong> files (as well as related <code>R.class</code> and <code>R.txt</code>
+files) to contain references to available resources. These R files contain
+integer <strong>resource ID</strong>s that developers can use to refer to their resources.
+Within an app, each resource ID refers to one unique resource.</p>
+
+<p>Developers can provide <a href="https://developer.android.com/guide/topics/resources/providing-resources.html#AlternativeResources">different
+versions</a>
+of the same resource (to support, for example, different languages, regions, or
+screen sizes). Android makes references to the base resource available in the R
+files, and Android devices select the best available version of that resource at
+runtime.</p>
+
+<h3>Resource processing with <code>aapt</code> and <code>aapt2</code></h3>
+
+<p><img src="/assets/android_resource_graph.png" alt="Diagram of android resource build process"></p>
+
+<p>Bazel supports processing resources using the original Android resource
+processor, <code>aapt</code>, or the new version, <code>aapt2</code>. Both methods are fundamentally
+similar but have a few important differences.</p>
+
+<p>Bazel goes through three steps to build resources.</p>
+
+<p>First, Bazel serializes the files that define the resources. In the <code>aapt</code>
+pipeline, the <strong>parse</strong> action serializes information about resources into
+<code>symbols.bin</code> files. In the <code>aapt2</code> pipeline, an action calls into the <strong><code>aapt2</code>
+compile</strong> command which serializes the information into a format used by
+<code>aapt2</code>.</p>
+
+<p>Next, the serialized resources are <strong>merged</strong> with similarly serialized
+resources inherited from dependencies. Conflicts between identically named
+resources are identified and, if possible, resolved during this merging. The
+contents of <code>values</code> resource files are generally explicitly merged. For other
+files, if resources from the target or its dependencies have the same name and
+qualifiers, the contents of the files are compared and, if they are different, a
+warning is produced and the resource that was provided last is chosen to be
+used.</p>
+
+<p>Finally, Bazel checks that the resources for the target are reasonable and
+packages them up. In the <code>aapt</code> pipeline, the <strong>validate</strong> action calls into the
+<code>aapt</code> <strong>package</strong> command, and in the <code>aapt2</code> pipeline, the <strong><code>aapt2</code> link</strong>
+command is called. In both cases, any malformed resources or references to
+unavailable resources cause a failure, and, if no failures are encountered,
+<code>R.java</code> and <code>R.txt</code> files are produced with information about the validated
+resources, and a Resource APK containing those resources is produced.</p>
+
+<p>Using <code>aapt2</code> rather than <code>aapt</code> provides better and more efficient support for
+a variety of cases. Additionally, more of the resource processing steps are
+handled by <code>aapt2</code> as opposed to Bazel&#39;s custom resource processing tools.
+Finally, since the serialized format can be understood as-is by future calls to
+<code>aapt2</code>, Bazel no longer has to deserialize information about resources to a
+form <code>aapt2</code> can understand.</p>
+
+<p>The resource ID values generated for <code>android_library</code> targets are only
+temporary, since higher-level targets might depend on multiple targets where
+different resources were assigned the same ID. To ensure that resource IDs
+aren’t persisted anywhere permanent, the R files record the IDs as nonfinal,
+ensuring that compilation doesn’t inline them into other Java code.
+Additionally, an <code>android_library</code>&#39;s R files should be discarded after building
+is complete.</p>
+
+<p>(Even though <code>android_library</code> files are eventually discarded, we still need to
+run resource processing to generate a temporary <code>R.class</code> to allow compilation,
+to merge resources so they can be inherited by consumers, and to validate that
+the resources can be compiled correctly - otherwise, if a developer introduces a
+bug in their resource definitions, it won’t be caught until they’re used in an
+<code>android_binary,</code> resulting in a lot of wasted work done by Bazel.)</p>
+
+<p>Code in android libraries and binaries make references to code in the R files,
+so the <code>R.class</code> file must be generated before regular compilation can start.
+For <code>android_library</code> targets, since all resource IDs are temporary anyway, we
+can speed things up by generating a <code>R.class</code> file at the end of resource
+merging. For <code>android_binary</code> targets, we need to wait for the output of
+validation to get correct resource IDs. Validation does produce an <code>R.java</code>
+file, but <strong>generating an <code>R.class</code></strong> file directly from the contents of the
+<code>R.txt</code> file is much faster than compiling the <code>R.java</code> file into an <code>R.class</code>
+file.</p>
+
+<h3>Android Resource Optimizations</h3>
+
+<h4>Resource Filtering</h4>
+
+<p>The <code>android_binary</code> rule includes optional
+<a href="https://docs.bazel.build/versions/master/be/android.html#android_binary.resource_configuration_filters"><code>resource_configuration_filters</code></a>
+and
+<a href="https://docs.bazel.build/versions/master/be/android.html#android_binary.densities"><code>densities</code></a>
+fields. These fields limit the types of devices that will be built for. For
+example, if you only wanted to build for English-language devices with HDPI
+displays, you could specify:</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">android_binary</span><span class="p">(</span>
+  <span class="c"># ...</span>
+  <span class="n">densities</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;hdpi&quot;</span><span class="p">],</span>
+  <span class="n">resource_configuration_filters</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;en&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</code></pre></div>
+<p>Bazel will now be able to skip unneeded resources. As a result, the build will
+be faster and the resulting APK will be smaller. It won&#39;t support all kinds of
+devices and user preferences, but this speed improvement means developers can
+build and iterate faster.</p>
+
+<h2>Android Libraries</h2>
+
+<p><img src="/assets/android_library_graph.png" alt="Diagram of `android_library` build process"></p>
+
+<p>An
+<a href="https://docs.bazel.build/versions/master/be/android.html#android_library"><code>android_library</code></a>
+rule is a pretty simple rule that builds and organizes an android library for
+use in another Android target. In the analysis phase, there are basically three
+groups of actions generated:</p>
+
+<p>First, Bazel processes the library&#39;s resources, as described
+<a href="#android-resources">above</a>.</p>
+
+<p>Next comes the actual compilation of the library. This mostly just uses the
+regular Bazel Java compilation path. The biggest difference is that the
+<code>R.class</code> file produced in resource processing is also included in the
+compilation path (but is not inherited by consumers, since the R files need to
+be regenerated for each target).</p>
+
+<p>Finally, Bazel does some additional work on the compiled code:</p>
+
+<ol>
+<li> The compiled <code>.class</code> files are
+<a href="https://github.com/bazelbuild/bazel/blob/master/src/tools/android/java/com/google/devtools/build/android/desugar/Desugar.java">desugared</a>
+to replace bytecode only supported on Java 8 with Java 7 equivalents. Bazel
+does this so that Java 8 language features can be used for developing the
+app, even though the next tool, <code>dx</code>, does not support Java 8 bytecode.</li>
+<li> The desugared <code>.class</code> files are converted to <code>.dex</code> files, executables for
+Android devices, by <code>dx</code>. These <code>.dex</code> files are then packed into the <code>.jar</code>
+file used at runtime. These <em>incremental <code>.dex</code></em> files, produced for each
+library, mean that, when some libraries from an app are changed, only those
+libraries, and not the entire app, need to be re-dexed.</li>
+<li> The source <code>.java</code> files for this library are used by <code>hjar</code> to generate a
+<code>jar</code> of <code>.class</code> files. Method bodies and private fields are removed from
+this compile-time <code>.jar</code>, and targets that depend on this library are
+compiled against this smaller <code>.jar</code>. Since these jars contain just the
+interface of the library, when private fields or method implementations
+change, dependent libraries do not need to be recompiled (they need to be
+recompiled only when the interface of the library changes), which results in
+faster builds.</li>
+</ol>
+
+<h2>Android Binaries</h2>
+
+<p><img src="/assets/android_binary_graph.png" alt="Diagram of `android_binary` build process"></p>
+
+<p>An
+<a href="https://docs.bazel.build/versions/master/be/android.html#android_binary"><code>android_binary</code></a>
+rule packages the entire target and its dependencies into an APK. On a high
+level, binaries are built similarly to libraries. However, there are a few key
+differences.</p>
+
+<p>For binaries, the three main resource processing actions (parse, merge, and
+validate), are all combined into a single large action. In libraries, Java
+compilation can get started while validation is still ongoing, but in binaries,
+since we need the final resource IDs from validation, we can&#39;t take advantage of
+similar parallelization. Since creating more actions always introduces a small
+cost, and there&#39;s no parallelization available to make up for it, having a
+single resource processing action is actually more efficient.</p>
+
+<p>In binaries, the Java code is compiled, desugared, and dexed, just like in
+libraries. However, afterwards, the <code>.dex</code> files from the binary are merged
+together with the <code>.dex</code> files from dependencies.</p>
+
+<p>Bazel also links together compiled <code>C</code> and <code>C++</code> native code from dependencies
+into a single <code>.so</code> file for each CPU architecture specified by the
+<a href="https://docs.bazel.build/versions/master/user-manual.html#flag--fat_apk_cpu"><code>--fat_apk_cpu</code></a>
+flag.</p>
+
+<p>The merged <code>.dex</code> files, the <code>.so</code> files, and the resource APK are all combined
+to build an initial binary APK, which is then
+<a href="https://developer.android.com/studio/command-line/zipalign.html">zipaligned</a> to
+produce an unsigned APK. Finally, the unsigned APK is signed with the binary&#39;s
+debug key to produce a signed APK.</p>
+
+<p>The merged <code>.dex</code> files are combined with the resource APK to build an initial
+binary APK, which is then
+<a href="https://developer.android.com/studio/command-line/zipalign.html">zipaligned</a> to
+produce an unsigned APK. Finally, the unsigned APK is signed with the binary&#39;s
+debug key to produce a signed APK.</p>
+
+<h2>ProGuarded Android Binaries</h2>
+
+<p><img src="/assets/android_binary_graph_proguard.png" alt="Diagram of `android_binary` build process with
+ProGuard"></p>
+
+<p>Bazel supports running <a href="https://www.guardsquare.com/en/proguard">ProGuard</a>
+against <code>android_binary</code> targets to <a href="https://www.guardsquare.com/en/proguard/manual/introduction">optimize them and reduce their
+size</a>. Using
+ProGuard substantially changes elements of the build process. In particular, the
+build process does not use incremental <code>.dex</code> files at all, as ProGuard can only
+run on <code>.class</code> files, not <code>.dex</code> files.</p>
+
+<p>ProGuarding uses a <code>deploy.jar</code> file, a single <code>.jar</code> file with all of the
+binary&#39;s Java bytecode, created from the binary&#39;s desugared (but not dexed)
+<code>.class</code> files as well as the binary&#39;s transitive runtime <code>.jar</code> files. (This
+<code>deploy.jar</code> file is an output of all <code>android_binary</code> targets, but it doesn&#39;t
+play a substantial role in builds without ProGuarding.)</p>
+
+<p>Based on information from a series of Proguard specifications (from both the
+binary and its transitive dependencies), ProGuard makes serveral passes through
+the <code>deploy.jar</code> in order to optimize the code, remove unused methods and
+fields, and shorten and obfuscate the names of the methods and fields that
+remain. In addition to the resulting proguarded <code>.jar</code> file, ProGuard also
+outputs a mapping from old to new names of methods and fields.</p>
+
+<p>ProGuard’s output is not dexed, so when building with ProGuard, the entire
+<code>.jar</code> must be re-dexed (even code from dependencies that were dexed
+incrementally). The dexed code is then built into the APK as usual.</p>
+
+<p>ProGuard will also remove references to unused resources from the class files.
+If <a href="https://docs.bazel.build/versions/master/be/android.html#android_binary.shrink_resources">resource
+shrinking</a>
+is enabled, the resource shrinker uses the proguard output to figure out what
+resources are no longer used, and then uses <code>aapt</code> or <code>aapt2</code> to create a new,
+smaller resource APK with those resources removed. The shrunk resource APK and
+the dexed APK are then fed into the APK building process, which operates the
+same as it would without ProGuard.</p>
+
+<h2>Mobile-install</h2>
+
+<p><a href="https://docs.bazel.build/versions/master/mobile-install.html">Mobile-install</a>
+is a way of rapidly building and deploying Android applications iteratively.
+It’s based off of <code>android_binary</code>, but has some additional functionality to
+make builds and deployments more incremental.</p>
+
+            </div>
+            
+          </div>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+
+    <!-- Anchor JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.0/anchor.min.js"></script>
+    <script>
+      // Automatically add anchors and links to all header elements that don't already have them.
+      anchors.add();
+    </script>
+  </body>
+</html>

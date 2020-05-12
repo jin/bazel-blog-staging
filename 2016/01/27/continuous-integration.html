@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="https://schema.org/WebPage">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Using Bazel in a continuous integration system - Bazel</title>
+
+    <link rel="canonical" href="/2016/01/27/continuous-integration.html">
+    <link rel="alternate" type="application/rss+xml" title="Bazel Blog" href="/feed.xml">
+
+    <!-- Webfont -->
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro:400,500,700|Open+Sans:400,600,700,800" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16">
+
+    <!-- Bootstrap -->
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+
+    <!-- metadata -->
+    <meta name="og:title" content="Using Bazel in a continuous integration system">
+    <meta name="og:image" content="https://bazel.build/images/bazel-og-image.png">
+  </head>
+
+  <body>
+        <nav id="common-nav" class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="https://bazel.build/">
+            <img class="navbar-logo" src="/images/bazel-navbar.svg">
+          </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://github.com/bazelbuild/bazel">
+                <span class="hidden-sm">GitHub</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-github"></i></span>
+              </a>
+            </li>
+          </ul>
+          <form class="navbar-form navbar-right" action="https://bazel.build/search.html" id="cse-search-box">
+            <div class="form-group">
+              <input type="hidden" name="cx" value="012346921571893344015:xv_nfgpzbu4">
+              <input type="hidden" name="cof" value="FORID:10">
+              <input type="hidden" name="ie" value="UTF-8">
+              <input type="search" name="q" class="form-control input-sm" placeholder="Search">
+            </div>
+          </form>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <a href="https://docs.bazel.build">Documentation</a>
+            </li>
+            <li>
+              <a href="https://bazel.build/contributing.html">Contribute</a>
+            </li>
+            <li>
+              <a href="https://blog.bazel.build">
+                <span class="hidden-sm">Blog</span>
+                <span class="nav-icon visible-sm"><i class="fa fa-rss"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="https://twitter.com/bazelbuild">
+                <span class="visible-xs">Twitter</span>
+                <span><i class="nav-icon fa fa-twitter hidden-xs"></i></span>
+              </a>
+            </li>
+            <li>
+              <a href="http://stackoverflow.com/questions/tagged/bazel">
+                <span class="visible-xs">StackOverflow</span>
+                <span><i class="nav-icon fa fa-stack-overflow hidden-xs"></i></span>
+              </a>
+            </li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
+
+    <div class="page-title-bar">
+      <div class="container">
+        <h1>Bazel Blog</h1>
+      </div>
+    </div>
+
+    <div class="container vpad">
+      <div class="row">
+        <div class="col-lg-9">
+          <div class="blog-post">
+            <h1 class="blog-post-title">Using Bazel in a continuous integration system</h1>
+            <div class="blog-post-meta">
+              
+
+By
+
+
+
+  
+  
+
+  
+    <a href="https://github.com/damienmg">Damien Martin-Guillerez</a>
+  
+  
+
+
+on <span class="text-muted">27 January 2016</span>
+
+            </div>
+            <div class="blog-post-content">
+              <p>When doing continuous integration, you do not want your build to fail because a
+a tool invoked during the build has been updated or some environmental
+conditions have changed. Because Bazel is designed for reproducible builds and
+keeps track of almost every dependency of your project, Bazel is a great tool
+for use inside a CI system. Bazel also caches results of previous build,
+including test results and will not re-run unchanged tests, speeding up each
+build.</p>
+
+<h2>Running Bazel on virtual or physical machines.</h2>
+
+<p>For <a href="http://ci.bazel.build">ci.bazel.build</a>, we use
+<a href="https://cloud.google.com/compute/">Google Compute Engine</a> virtual machine for
+our Linux build and a physical Mac mini for our Mac build. Apart from Bazel
+tests that are run using the
+<a href="https://github.com/bazelbuild/bazel/blob/master/compile.sh"><code>./compile.sh</code></a>
+script, we also run some projects to validate Bazel binaries against: the
+<a href="https://github.com/bazelbuild/examples/tree/master/tutorial">Bazel Tutorial</a>
+<a href="http://ci.bazel.build/job/Tutorial/">here</a>,
+<a href="https://github.com/google/re2">re2</a> <a href="http://ci.bazel.build/job/re2/">here</a>,
+<a href="https://github.com/google/protobuf">protobuf</a>
+<a href="http://ci.bazel.build/job/protobuf/">here</a>, and
+<a href="https://www.tensorflow.org">TensorFlow</a>
+<a href="http://ci.bazel.build/job/TensorFlow/">here</a>.</p>
+
+<p>Bazel is reinstalled each time we run the tutorial or TensorFlow, but the Bazel
+cache is maintained across installs. The setup for those jobs is the following:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">set</span> -e
+
+<span class="c"># Fetch the Bazel installer</span>
+<span class="nv">URL</span><span class="o">=</span>https://github.com/bazelbuild/bazel/releases/download/<span class="k">${</span><span class="nv">BAZEL_VERSION</span><span class="k">}</span>/bazel-<span class="k">${</span><span class="nv">BAZEL_VERSION</span><span class="k">}</span>-installer-<span class="k">${</span><span class="nv">INSTALLER_PLATFORM</span><span class="k">}</span>.sh
+<span class="nb">export </span><span class="nv">BAZEL_INSTALLER</span><span class="o">=</span><span class="k">${</span><span class="nv">PWD</span><span class="k">}</span>/bazel-installer/install.sh
+curl -L -o <span class="k">${</span><span class="nv">BAZEL_INSTALLER</span><span class="k">}</span> <span class="k">${</span><span class="nv">URL</span><span class="k">}</span>
+<span class="nv">BASE</span><span class="o">=</span><span class="s2">&quot;${PWD}/bazel-install&quot;</span>
+
+<span class="c"># Install bazel inside ${BASE}</span>
+bash <span class="s2">&quot;${BAZEL_INSTALLER}&quot;</span> <span class="se">\</span>
+  --base<span class="o">=</span><span class="s2">&quot;${BASE}&quot;</span> <span class="se">\</span>
+  --bazelrc<span class="o">=</span><span class="s2">&quot;${BASE}/bin/bazel.bazelrc&quot;</span> <span class="se">\</span>
+  --bin<span class="o">=</span><span class="s2">&quot;${BASE}/binary&quot;</span>
+
+<span class="c"># Run the build</span>
+<span class="nv">BAZEL</span><span class="o">=</span><span class="s2">&quot;${BASE}/binary/bazel --bazelrc=${BASE}/bin/bazel.bazelrc&quot;</span>
+<span class="k">${</span><span class="nv">BAZEL</span><span class="k">}</span> <span class="nb">test</span> //...
+</code></pre></div>
+<p>This tests installing a specific version of Bazel each time. Of course, if
+Bazel is installed on the path, one can simply <code>bazel test //...</code>. However,
+even with reinstalling all the time, Bazel caching simply works.</p>
+
+<h2>Running Bazel inside a Docker container</h2>
+
+<p>Several people want to use Bazel in a Docker container. First of all, Bazel
+has some feature that are incompatibles with Docker:</p>
+
+<ul>
+<li>Bazel runs by default in client/server mode using UNIX domain sockets, so if
+you cannot mount the socket inside the Docker container, then you must disable
+client-server communication by running Bazel in batch mode with the <code>--batch</code>
+flag.</li>
+<li>Bazel <a href="http://bazel.build/blog/2015/09/11/sandboxing.html">sandboxes all actions on linux by default</a>
+and this needs special privileges in the Docker container (enabled by
+<a href="https://docs.docker.com/engine/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration"><code>--privilege=true</code></a>.
+If you cannot enable the namespace sandbox, you can deactivate it in Bazel
+with the <code>--genrule_strategy=standalone --spawn_strategy=standalone</code> flags.</li>
+</ul>
+
+<p>So the last step of the previous script would look like:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="c"># Run the build</span>
+<span class="nv">BAZEL</span><span class="o">=</span><span class="s2">&quot;${BASE}/binary/bazel --bazelrc=${BASE}/bin/bazel.bazelrc --batch&quot;</span>
+<span class="k">${</span><span class="nv">BAZEL</span><span class="k">}</span> <span class="nb">test</span> --genrule_strategy<span class="o">=</span>standalone --spawn_strategy<span class="o">=</span>standalone <span class="se">\</span>
+    //...
+</code></pre></div>
+<p>This build will however be slower because the server has to restart for every
+build and the cache will be lost when the Docker container is destroyed.</p>
+
+<p>To prevent the loss of the cache, it is better to mount a persistent volume for
+<code>~/.cache/bazel</code> (where the Bazel cache is stored).</p>
+
+<h2>Return code and XML output</h2>
+
+<p>A final consideration when setting up a continuous integration system is getting
+the result from the build. Bazel has the following interesting exit codes when
+using <code>test</code> and <code>build</code> commands:</p>
+
+<table class="table table-condensed table-striped">
+  <thead>
+    <tr>
+      <th>Exit Code</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0</td>
+      <td>Success.</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>Build failed.</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>
+        Command Line Problem, Bad or Illegal flags or command combination, or
+        Bad Environment Variables. Your command line must be modified.
+      </td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Build OK, but some tests failed or timed out.</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>
+        Build successful but no tests were found even though testing was
+        requested.
+      </td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>
+        Build interrupted (by a <kbd><kbd>Ctrl</kbd>+<kbd>C</kbd></kbd> from the
+        user for instance) but we terminated with an orderly shutdown.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p>These return codes can be used to determine the reason for a failure
+(in <a href="http://ci.bazel.build">ci.bazel.build</a>, we mark builds that have exited with exit
+code 3 as unstable, and other non zero code as failed).</p>
+
+<p>You can also control how much information about test results Bazel prints out
+with the <a href="https://docs.bazel.build/bazel-user-manual.html#flag--test_output"><code>--test_output</code> flag</a>.
+Generally, printing the output of test that fails with <code>--test_output=errors</code> is
+a good setting for a CI system.</p>
+
+<p>Finally, Bazel&#39;s built-in <a href="https://github.com/bazelbuild/bazel/blob/master/src/java_tools/junitrunner">JUnit test runner</a>
+generates Ant-style XML output file (in <code>bazel-testlogs/pkg/target/test.xml</code>)
+that summarizes the results of your tests. This test runner can be activated
+with the <code>--nolegacy_bazel_java_test</code> flag (this will soon be the default).
+Other tests also get <a href="https://github.com/bazelbuild/bazel/blob/master/tools/test/test-setup.sh#L54">a basic XML output file</a>
+that contains only the result of the test (success or failure).</p>
+
+            </div>
+            
+          </div>
+        </div>
+                <div class="col-lg-3 hidden-sm hidden-xs">
+          <h2>Twitter</h2>
+          <p>For more frequent updates, follow us on Twitter.</p>
+          <p><a class="twitter-follow-button" href="https://twitter.com/bazelbuild" data-show-count="false" data-size="large">Follow @bazelbuild</a></p>
+          <h2>Discuss</h2>
+          <p>Join the discussion on our <a href="https://groups.google.com/forum/#!forum/bazel-discuss">mailing list</a>.</p>
+          <h2>Subscribe</h2>
+          <p>Subscribe to our blog via the <a rel="alternate" type="application/rss+xml" href="/feed.xml">RSS Feed</a> or via email:</p>
+          <div class="well">
+            <form action="https://feedburner.google.com/fb/a/mailverify" method="post" target="popupwindow" onsubmit="window.open('https://feedburner.google.com/fb/a/mailverify?uri=BazelBlog', 'popupwindow', 'scrollbars=yes,width=550,height=520');return true">
+              <div class="form-group">
+                <input type="text" class="form-control" name="email" placeholder="name@email.com">
+              </div>
+              <input type="hidden" value="BazelBlog" name="uri">
+              <input type="hidden" name="loc" value="en_US">
+              <button type="submit" class="btn btn-primary btn-block">Subscribe</button>
+            </form>
+            <p>Delivered by <a href="https://feedburner.google.com" target="_blank">FeedBurner</a></p>
+          </div>
+          <h2>Contribute</h2>
+          <p>The source for this blog can be found on <a href="https://github.com/bazelbuild/bazel-blog">GitHub</a>.</p>
+          <h2>Archive</h2>
+          <p>Looking for a specific post? Find it on the <a href="/archive.html">Archive</a> page.</p>
+        </div>
+
+      </div>
+    </div>
+
+        <footer class="footer">
+      <div class="container">
+  <div class="row">
+    <div class="col-sm-4 col-md-2">
+      <p>About</p>
+      <ul class="list-unstyled">
+        <li><a href="https://github.com/bazelbuild/bazel/wiki/Bazel-Users">Who's Using Bazel?</a></li>
+        <li><a href="https://bazel.build/roadmap.html">Roadmap</a></li>
+        <li><a href="https://bazel.build/contributing.html">Contribute</a></li>
+        <li><a href="https://bazel.build/governance.html">Governance Plan</a></li>
+        <li><a href="https://policies.google.com/privacy">Privacy Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Support</p>
+      <ul class="list-unstyled">
+        <li><a href="http://stackoverflow.com/questions/tagged/bazel">Stack Overflow</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel/issues">Issue Tracker</a></li>
+        <li><a href="https://docs.bazel.build">Documentation</a></li>
+        <li><a href="https://bazel.build/faq.html">FAQ</a></li>
+        <li><a href="https://bazel.build/support.html">Support Policy</a></li>
+      </ul>
+    </div>
+    <div class="col-sm-4 col-md-2">
+      <p>Stay Connected</p>
+      <ul class="list-unstyled">
+        <li><a href="https://twitter.com/bazelbuild">Twitter</a></li>
+        <li><a href="https://blog.bazel.build">Blog</a></li>
+        <li><a href="https://github.com/bazelbuild/bazel">GitHub</a></li>
+        <li><a href="https://groups.google.com/forum/#!forum/bazel-discuss">Discussion group</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <p class="text-muted">&copy; 2020 Google</p>
+    </div>
+  </div>
+</div>
+
+    </footer>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/assets/js/bootstrap.min.js"></script>
+
+    <script>
+      var shiftWindow = function() {
+        if (location.hash.length !== 0) {
+          window.scrollBy(0, -50);
+        }
+      };
+      window.addEventListener("hashchange", shiftWindow);
+
+      var highlightCurrentSidebarNav = function() {
+        var href = location.pathname;
+        var item = $('#sidebar-nav [href$="' + href + '"]');
+        if (item) {
+          var li = item.parent();
+          li.addClass("active");
+
+          if (li.parent() && li.parent().is("ul")) {
+            do {
+              var ul = li.parent();
+              if (ul.hasClass("collapse")) {
+                ul.collapse("show");
+              }
+              li = ul.parent();
+            } while (li && li.is("li"));
+          }
+        }
+      };
+
+      $(document).ready(function() {
+        // Scroll to anchor of location hash, adjusted for fixed navbar.
+        window.setTimeout(function() {
+          shiftWindow();
+        }, 1);
+
+        // Flip the caret when submenu toggles are clicked.
+        $(".sidebar-submenu").on("show.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.addClass("dropup");
+          }
+        });
+        $(".sidebar-submenu").on("hide.bs.collapse", function() {
+          var toggle = $('[href$="#' + $(this).attr('id') + '"]');
+          if (toggle) {
+            toggle.removeClass("dropup");
+          }
+        });
+
+        // Highlight the current page on the sidebar nav.
+        highlightCurrentSidebarNav();
+      });
+    </script>
+
+    <!-- Google Analytics tracking code -->
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61082125-1', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+    <!--
+JavaScript used by the Follow @bazelbuild on Twitter button on the blog sidebar.
+Code from: https://dev.twitter.com/web/follow-button
+-->
+
+<script>window.twttr=(function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],t=window.twttr||{};if(d.getElementById(id))return;js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);t._e=[];t.ready=function(f){t._e.push(f);};return t;}(document,"script","twitter-wjs"));</script>
+
+
+    <!-- Anchor JS -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/3.2.0/anchor.min.js"></script>
+    <script>
+      // Automatically add anchors and links to all header elements that don't already have them.
+      anchors.add();
+    </script>
+  </body>
+</html>

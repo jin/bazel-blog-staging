@@ -1,0 +1,723 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+
+<channel>
+  <title>Bazel Blog</title>
+  <link>http://blog.bazel.build</link>
+  <description>Fast, correct builds.</description>
+  
+    <item>
+      <title>Bazel 3.1</title>
+      <link>/2020/04/21/bazel-3-1.html</link>
+      <description>&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/3.1.0&quot;&gt;Bazel 3.1&lt;/a&gt; has just
+been released.&lt;/p&gt;
+
+&lt;h2&gt;Incompatible changes&lt;/h2&gt;
+
+&lt;p&gt;Bazel 3.1 is not a major release. As such, updating from Bazel 3.0 is expected to be straightforward.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The following obsolete flags have been removed:
+&lt;code&gt;--experimental_oom_more_eagerly&lt;/code&gt;,
+&lt;code&gt;--experimental_oom_more_eagerly_threshold&lt;/code&gt;,
+&lt;code&gt;--incompatible_bzl_disallow_load_after_statement&lt;/code&gt;,
+&lt;code&gt;--incompatible_no_output_attr_default&lt;/code&gt;,
+&lt;code&gt;--incompatible_restrict_named_params&lt;/code&gt;, &lt;code&gt;--incompatible_depset_union&lt;/code&gt;,
+&lt;code&gt;--incompatible_load_proto_toolchain_for_javalite_from_com_google_protobuf&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;A maximum attribute name length of 128 is enforced, as well as a maximum 200
+attributes per rule is enforced. These limitations were chosen to be large,
+and we don’t expect anyone to hit them. They allow Bazel to fail gracefully
+before internal limitations are reached.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;C++&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Allow assembly file sources in &lt;a href=&quot;https://docs.bazel.build/versions/3.1.0/skylark/lib/cc_common.html#compile&quot;&gt;&lt;code&gt;cc_common.compile&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Add stamp parameter for &lt;a href=&quot;https://docs.bazel.build/versions/3.1.0/skylark/lib/cc_common.html#link&quot;&gt;&lt;code&gt;cc_common.link&lt;/code&gt;&lt;/a&gt; to enable including build info.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Starlark&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Aspects may now propagate through dependencies on rule outputs by being
+defined with &lt;a href=&quot;https://docs.bazel.build/versions/3.1.0/skylark/lib/globals.html#aspect&quot;&gt;&lt;code&gt;apply_to_generating_rules = True&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;query --output=build&lt;/code&gt; now shows where rule classes are defined (in addition to where rule targets are instantiated).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Other changes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The
+&lt;a href=&quot;https://docs.bazel.build/versions/3.1.0/command-line-reference.html#flag--target_pattern_file&quot;&gt;&lt;code&gt;--target_pattern_file&lt;/code&gt;&lt;/a&gt;
+flag provides a way to supply any number of targets to bazel, regardless of
+operating system limits on command line length.&lt;/li&gt;
+&lt;li&gt;The default &lt;code&gt;.netrc&lt;/code&gt; file on Windows is set to &lt;code&gt;%USERPROFILE%\.netrc&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;The &lt;a href=&quot;https://docs.bazel.build/versions/3.1.0/repo/utils.html#patch&quot;&gt;&lt;code&gt;patch&lt;/code&gt; function&lt;/a&gt;
+can handle file permission properly.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as
+Alessandro Patti, Benjamin Peterson, Benjamin Romano, Bor Kae Hwang, Chris
+Heisterkamp, Cristian Hancila, Dmitri G, Douglas Parker, George Gensure, Gregor
+Jasny, John Millikin, Keith Smiley, Leo, Mike Fourie, Patrick Balestra, Robbert
+Van Ginkel, Ryota, Samuel Giddins, Ulf Adams, Vertexwahn, Xavier Bonaventura,
+Yannic Bonenberger.&lt;/p&gt;
+</description>
+      <pubDate>Tue, 21 Apr 2020 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Bazel 3.0</title>
+      <link>/2020/03/31/bazel-3.0.html</link>
+      <description>&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/3.0.0&quot;&gt;Bazel 3.0&lt;/a&gt; is a new major release and brings the following incompatible changes:&lt;/p&gt;
+
+&lt;h2&gt;Incompatible Changes&lt;/h2&gt;
+
+&lt;p&gt;The following incompatible flags are now enabled by default:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10730&quot;&gt;&lt;code&gt;--incompatible_remove_ram_utilization_factor&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10536&quot;&gt;&lt;code&gt;--incompatible_remove_local_resources&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10335&quot;&gt;&lt;code&gt;--incompatible_load_proto_toolchain_for_javalite_from_com_google_protobuf&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10313&quot;&gt;&lt;code&gt;--incompatible_always_check_depset_elements&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10262&quot;&gt;&lt;code&gt;--incompatible_remove_enabled_toolchain_types&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10047&quot;&gt;&lt;code&gt;--incompatible_validate_top_level_header_inclusions&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Before upgrading to Bazel 3.0, you can test your build with Bazel 2.2 and the flags above. We expect that the migration to Bazel 3.0 will be simple for most users. Please comment on the corresponding incompatible flag issue if any of the flags causes migration problems, or open a &lt;a href=&quot;http://github.com/bazelbuild/bazel/issues/new&quot;&gt;new issue&lt;/a&gt; if you have other problems.&lt;/p&gt;
+
+&lt;h3&gt;New Incompatible Changes&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Adds &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10854&quot;&gt;&lt;code&gt;--incompatible_objc_compile_info_migration&lt;/code&gt;&lt;/a&gt; to indicate whether native Objective C/C++ rules should assume compile info has been migrated to &lt;a href=&quot;https://docs.bazel.build/versions/master/skylark/lib/CcInfo.html&quot;&gt;&lt;code&gt;CcInfo&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Java&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Using JDK 9 or 10 as a &lt;a href=&quot;https://docs.bazel.build/versions/master/command-line-reference.html#flag--host_javabase&quot;&gt;&lt;code&gt;--host_javabase&lt;/code&gt;&lt;/a&gt; is no longer officially supported. As always, you can use the &lt;code&gt;@bazel_tools//tools/jdk:toolchain_vanilla&lt;/code&gt; Java &lt;a href=&quot;https://docs.bazel.build/versions/master/toolchains.html&quot;&gt;toolchain&lt;/a&gt; to use older or newer JDKs than what Bazel currently supports.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;C++&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Introduce flag &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10860&quot;&gt;&lt;code&gt;--incompatible_require_linker_input_cc_api&lt;/code&gt;&lt;/a&gt; which changes the C++ Starlark API for linking contexts, libraries to link and linker inputs. Disabled by default in this release.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Other important changes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;code&gt;--fatal_event_bus_exceptions&lt;/code&gt; is deprecated and should not be used. Any crashes should be &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/new&quot;&gt;reported&lt;/a&gt; so that they can be fixed.&lt;/li&gt;
+&lt;li&gt;  Actions&amp;#39; primary output details are now available in the JSON profile and &lt;code&gt;analysis_v2.proto&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;New flag: &lt;code&gt;--incompatible_applicable_licenses&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Default to false&lt;/li&gt;
+&lt;li&gt;  Enables a global rule attribute &lt;code&gt;applicable_licenses&lt;/code&gt; and a new &lt;code&gt;package&lt;/code&gt; attribute &lt;code&gt;default_applicable_licenses.&lt;/code&gt; Both are label lists.&lt;/li&gt;
+&lt;li&gt;  This is an incompatible change because rules using those attribute names may now have different behavior.&lt;/li&gt;
+&lt;li&gt;  For a description of how these attributes can be used, see: &lt;a href=&quot;https://docs.google.com/document/d/1uwBuhAoBNrw8tmFs-NxlssI6VRolidGYdYqagLqHWt8/edit#&quot;&gt;Design proposal: License Checking with Bazel&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Reading the old-style binary profile format is no longer supported, use the &lt;a href=&quot;https://docs.bazel.build/versions/master/skylark/performance.html#json-profile&quot;&gt;new JSON trace profile&lt;/a&gt; instead.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Community update&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Jonathon Belotti has been working on &lt;a href=&quot;https://github.com/thundergolfer/bazel-linting-system&quot;&gt;bazel-linting-system&lt;/a&gt;, an experimental system for registering, configuring, and invoking source-code linters in Bazel.&lt;/li&gt;
+&lt;li&gt;  Jingwen Chen and Greg Estren have created a &lt;a href=&quot;https://docs.bazel.build/versions/master/glossary.html&quot;&gt;glossary for Bazel&lt;/a&gt;. Contributions are welcome.&lt;/li&gt;
+&lt;li&gt;  Filip Nikolovski made some recommendations for improving &lt;a href=&quot;https://filipnikolovski.com/posts/bazel-performance-in-a-ci-environment&quot;&gt;Bazel Performance in a CI Environment&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  John Ward shared some thoughts on &lt;a href=&quot;http://www.johnward.net/2020/03/when-to-use-googles-bazel-build-tool-with-remote-execution/&quot;&gt;When to use Google&amp;#39;s Bazel build tool (with Remote Execution)&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as Alessandro Patti, Benjamin Peterson, Christy Norman, Dave Hughes, David Haxton, David Neil, George Chiramel, George Gensure, Gibson Fahnestock, Jason Hoch, John Millikin, Jonathan Springer, Keith Smiley, Yannic Bonenberger, Yihong Wang, Yuchen Dai, and garyschulte.&lt;/p&gt;
+</description>
+      <pubDate>Tue, 31 Mar 2020 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Bazel 2.2</title>
+      <link>/2020/03/03/bazel-2-2.html</link>
+      <description>&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/2.2.0&quot;&gt;Bazel 2.2&lt;/a&gt; has just
+been released.&lt;/p&gt;
+
+&lt;p&gt;Bazel 2.2 is intended to be backward-compatible with Bazel 2.0. There are no
+known breaking changes in this release.&lt;/p&gt;
+
+&lt;h2&gt;Incompatible changes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  The following flags have been removed, as they were flipped in previous
+releases:
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;code&gt;--incompatible_windows_bashless_run_command&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;--incompatible_windows_native_test_wrapper&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;--incompatible_disallow_dict_lookup_unhashable_keys&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;--incompatible_remap_main_repo&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;--incompatible_disallow_unverified_http_downloads&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;  The following incompatible flags have been added:
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10687&quot;&gt;&lt;code&gt;--incompatible_applicable_licenses&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10730&quot;&gt;&lt;code&gt;--incompatible_remove_ram_utilization_factor&lt;/code&gt;&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10335&quot;&gt;&lt;code&gt;--incompatible_load_proto_toolchain_for_javalite_from_com_google_protobuf&lt;/code&gt;&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;cquery&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  cquery&amp;#39;s
+&lt;a href=&quot;https://docs.bazel.build/versions/2.2.0/cquery.html#config&quot;&gt;&lt;code&gt;config()&lt;/code&gt;&lt;/a&gt; now
+supports arbitrary configurations.&lt;/li&gt;
+&lt;li&gt;  When using cquery, &lt;code&gt;//foo:bar&lt;/code&gt; now means &amp;quot;all configured targets with label
+&lt;code&gt;//foo:bar&lt;/code&gt;&amp;quot; instead of &amp;quot;choose an arbitrary configured target with label
+&lt;code&gt;//foo:bar&lt;/code&gt;&amp;quot;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;External Repositories&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;code&gt;WORKSPACE&lt;/code&gt; and &lt;code&gt;BUILD.bazel&lt;/code&gt; files of
+&lt;a href=&quot;https://docs.bazel.build/versions/2.2.0/repo/http.html&quot;&gt;&lt;code&gt;http_archive&lt;/code&gt;&lt;/a&gt;
+repositories can now be patched using the &lt;code&gt;patch_cmds&lt;/code&gt; and &lt;code&gt;patches&lt;/code&gt;
+attributes.&lt;/li&gt;
+&lt;li&gt;  Flags that affect external repositories like &lt;code&gt;--override_repository&lt;/code&gt; can now
+be addressed in &lt;code&gt;bazelrc&lt;/code&gt; files using the &lt;code&gt;common&lt;/code&gt; command, without causing
+commands like &lt;code&gt;bazel shutdown&lt;/code&gt; to fail.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Starlark&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  The
+&lt;a href=&quot;https://docs.bazel.build/versions/2.2.0/user-manual.html#flag--starlark_cpu_profile&quot;&gt;&lt;code&gt;--starlark_cpu_profile=&lt;/code&gt;&lt;/a&gt;
+flag writes a profile in pprof format containing a statistical summary of
+CPU usage by all Starlark execution during the bazel command. Use it to
+identify slow Starlark functions in loading and analysis.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Windows&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  We now discourage running Bazel from MSYS2 because of a newly found
+bug (&lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10573&quot;&gt;#10573&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Other changes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Actions with &lt;code&gt;parse&lt;/code&gt; on the critical path should no longer finish in the
+future.&lt;/li&gt;
+&lt;li&gt;  Reduced the packaging time (package-bazel.sh) for the &lt;code&gt;//src:bazel-dev&lt;/code&gt;
+Bazel development build target from 14s to 6s. Use &lt;code&gt;//src:bazel-dev&lt;/code&gt; if
+you&amp;#39;re iterating rapidly on a local Bazel changes, and use &lt;code&gt;//src:bazel&lt;/code&gt;
+with &lt;code&gt;--compilation_mode=opt&lt;/code&gt; for release builds.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as
+Alessandro Patti, Alex Kirchhoff, Artur Dryomov, Benjamin Peterson, David
+Ostrovsky, Elliotte Rusty Harold, Eric Klein, George Chiramel, George Gensure,
+Guillaume Bouchard, Hui-Zhi, John Millikin, Jonathan Springer, Michael
+McLoughlin, Nikolaus Wittenstein, Nikolay Shelukhin, Yannic Bonenberger, aman,
+nikola-sh.&lt;/p&gt;
+</description>
+      <pubDate>Tue, 03 Mar 2020 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Changes to Xcode selection in Bazel</title>
+      <link>/2020/02/26/xcode-selection.html</link>
+      <description>&lt;p&gt;As of Bazel 2.1, you can now use any locally-available Xcode version with &lt;a href=&quot;/2019/02/01/dynamic-spawn-scheduler.html&quot;&gt;dynamic execution&lt;/a&gt;! Read on to learn more about why we created this new functionality, how it works, why you would (or wouldn’t) want to use it, and how to opt into it if you do.&lt;/p&gt;
+
+&lt;h2&gt;Setting the scene&lt;/h2&gt;
+
+&lt;p&gt;One of our major projects in the last year has been improving build times for interactive iOS builds by adding support for the Google-internal remote execution service from Mac. Combined with dynamic execution, which helps mitigate deficiencies in our remote Mac executors by running some actions locally, we are now able to deliver the best possible clean and incremental build times.&lt;/p&gt;
+
+&lt;p&gt;This was a hands down performance improvement, but users kept opting out. Why? Were they nostalgic for slower builds?&lt;/p&gt;
+
+&lt;h2&gt;Background&lt;/h2&gt;
+
+&lt;p&gt;Bazel performs Xcode selection based on the &lt;code&gt;--xcode_config&lt;/code&gt; and &lt;code&gt;--xcode_version&lt;/code&gt; flags. &lt;code&gt;--xcode_config&lt;/code&gt; takes an instance of the &lt;code&gt;xcode_config&lt;/code&gt; rule, which contains information about the default and available Xcode versions, and selects a single Xcode version to be used. The selected Xcode is either the value of the &lt;code&gt;--xcode_version&lt;/code&gt; flag, if it’s available, otherwise it’s the default version of the &lt;code&gt;xcode_config&lt;/code&gt;. The &lt;code&gt;xcode_config&lt;/code&gt; rule also validates the values of both flags.&lt;/p&gt;
+
+&lt;p&gt;The original &lt;code&gt;xcode_config&lt;/code&gt; rule takes a list of &lt;code&gt;xcode_version&lt;/code&gt; targets for its &lt;code&gt;versions&lt;/code&gt; attribute, and a single &lt;code&gt;xcode_version&lt;/code&gt; as the &lt;code&gt;default&lt;/code&gt;, like this:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;xcode_version&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;10.2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;xcode_version&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;11.1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;xcode_config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_config&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;versions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This shape works well for purely local or purely remote builds---that is, any case when all of the possible Xcodes are on a single platform.&lt;/p&gt;
+
+&lt;p&gt;However, having a single pool of Xcode versions doesn’t really express the reality for dynamic execution, where the remote and local platforms have separate, and potentially disjoint, sets of Xcode versions available. &lt;/p&gt;
+
+&lt;p&gt;To make this rule shape work with dynamic execution, we used an &lt;code&gt;--xcode_config&lt;/code&gt; that just contained the remotely available Xcode versions, then required our users to have the selected Xcode version (either &lt;code&gt;--xcode_version&lt;/code&gt; or the remote default) installed on their machines.&lt;/p&gt;
+
+&lt;h2&gt;What’s wrong with that?&lt;/h2&gt;
+
+&lt;p&gt;There are two problems here. &lt;/p&gt;
+
+&lt;p&gt;First of all, the default version has no awareness of the locally available Xcode versions, which means that Bazel could choose an Xcode version that wasn’t available locally, and then fail to build. This was frustrating to developers, exacerbated by the fact that the resulting error message made it seem like &lt;em&gt;they’d&lt;/em&gt; passed an invalid &lt;code&gt;--xcode_version&lt;/code&gt;. We needed Bazel to select a more intelligent default.&lt;/p&gt;
+
+&lt;p&gt;More importantly, requiring that the selected Xcode version be available both locally and remotely was problematic for developers who needed to use the newest Xcode version before that Xcode version was available remotely. A common problem was that an engineers’ devices would auto-update to require the newest Xcode version, while we were still vetting and deploying that version to the remote build system, a process that could take weeks. Developers would disable dynamic remote builds, tolerate very slow local builds, and, not knowing when their Xcode version became remotely and they could re-enable dynamic execution, would suffer poor performance forever. We needed to figure out how to enable users to use the Xcode version of their choice, without requiring them to disable dynamic remote builds.&lt;/p&gt;
+
+&lt;p&gt;The solution we chose took two parts:
+*  Adapting the Xcode config rule to better express the Xcode versions available for dynamic scheduling.
+*  Configuring dynamic execution to tolerate local- or remote-only Xcode versions, by setting action execution requirements based on the availability of the selected Xcode.&lt;/p&gt;
+
+&lt;h2&gt;The new xcode_config rule&lt;/h2&gt;
+
+&lt;p&gt;We first introduced a new rule, &lt;code&gt;available_xcodes&lt;/code&gt;, which takes the same fields as the original &lt;code&gt;xcode_config&lt;/code&gt; rule shape, but exposes them all instead of performing Xcode selection. &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;xcode_version&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;10.2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;xcode_version&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;11.1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;available_xcodes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;local_xcodes&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;versions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;available_xcodes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;remote_xcodes&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;versions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[,&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xcode11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Does that look familiar?&lt;/p&gt;
+
+&lt;p&gt;We then modified the &lt;code&gt;xcode_config&lt;/code&gt; rule to accept two &lt;code&gt;available_xcodes&lt;/code&gt; dependencies to represent the locally and remotely available Xcode versions. Note that this new shape doesn’t accept the original attributes, &lt;code&gt;default&lt;/code&gt; and &lt;code&gt;versions&lt;/code&gt;. These concepts are reflected in the &lt;code&gt;available_xcodes&lt;/code&gt; dependencies.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;xcode_config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_config&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;local_versions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;local_xcodes&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;remote_versions&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;remote_xcodes&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Xcode version selection&lt;/h2&gt;
+
+&lt;p&gt;Both &lt;code&gt;xcode_config&lt;/code&gt; shapes select the value of &lt;code&gt;--xcode_version&lt;/code&gt; if it’s present, or else the default. They differ, however, in what constitutes the default, and in the behavior if the selected Xcode is only present on a single platform.&lt;/p&gt;
+
+&lt;p&gt;You might remember that we were using the remote &lt;code&gt;xcode_config&lt;/code&gt; with dynamic execution, which resulted in build failures if the default (remote) version wasn’t available locally. We addressed this issue firstly by having the new &lt;code&gt;xcode_config&lt;/code&gt; set a mutually available Xcode version as the default if possible (otherwise the default of the &lt;code&gt;local_versions&lt;/code&gt; target), and secondly by allowing selection of any Xcode version present in &lt;code&gt;local_versions&lt;/code&gt; or &lt;code&gt;remote_versions&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;A mutually available Xcode should result in the best performance, since it enables both local and remote execution, and since some actions (e.g. Swift compiles) must be executed locally, the local default is the next best thing. Xcode version selection occurs in this order, mutual first, then local default, but you can skip straight to the local default by passing &lt;code&gt;--experimental_prefer_mutual_xcode=false&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Since the new &lt;code&gt;xcode_config&lt;/code&gt; requires both dependencies to be set, we will never default to a remote-only Xcode version. We considered allowing a remote-only Xcode version in the absence of a locally available Xcode, but decided that preventing builds from failing cryptically if there was no Xcode to execute local actions was more important than providing the flexibility for dynamic execution to behave like a purely remote strategy.&lt;/p&gt;
+
+&lt;h2&gt;Configuring dynamic execution&lt;/h2&gt;
+
+&lt;p&gt;The last piece is having Bazel execute actions in the right location based on the availability of the selected Xcode. If we’ve selected a local-only or remote-only Xcode, either via &lt;code&gt;--xcode_version&lt;/code&gt; or by accepting the default, we want to keep the dynamic scheduler from trying to execute Xcode-related actions on the other system. &lt;/p&gt;
+
+&lt;p&gt;We considered bypassing the dynamic scheduler by setting an overall execution strategy based on the Xcode availability. However, we &lt;em&gt;do&lt;/em&gt; want to be able to use either platform for actions that don’t care about Xcodes (plus, this proposal was pretty complicated to implement). &lt;/p&gt;
+
+&lt;p&gt;Instead, we had the dynamic scheduler set the execution strategy on a per-action basis. We did this by having the &lt;code&gt;XcodeConfig&lt;/code&gt; provide a list of execution requirements, including location-based restrictions like &lt;code&gt;no-remote&lt;/code&gt;. Implementations of rules that depend on &lt;code&gt;XcodeConfig&lt;/code&gt; were modified to propagate these execution requirements to the actions they produce. The dynamic scheduler then checks each action for its location-based requirements, and disables the incompatible execution location, if there is one. &lt;/p&gt;
+
+&lt;h2&gt;Takeaways&lt;/h2&gt;
+
+&lt;p&gt;If you use dynamic execution, you should use the new &lt;code&gt;xcode_config&lt;/code&gt; rule shape to get more flexibility, better defaults, and more reasonable error messages!&lt;/p&gt;
+
+&lt;p&gt;You should still use the old &lt;code&gt;xcode_config&lt;/code&gt; shape for local-only or remote-only builds.&lt;/p&gt;
+
+&lt;p&gt;We’re excited to roll this out internally, so more developers can reap the benefits of dynamic scheduling.&lt;/p&gt;
+</description>
+      <pubDate>Wed, 26 Feb 2020 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Bazel 2.1</title>
+      <link>/2020/02/06/bazel-2.1.html</link>
+      <description>&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/2.1.0&quot;&gt;Bazel 2.1&lt;/a&gt; has just been released.&lt;/p&gt;
+
+&lt;p&gt;Bazel 2.1 is intended to be backward-compatible with Bazel 2.0. However it contains a single incompatible change that was deemed a bug fix and thus eligible for inclusion. We haven’t found any code broken by this change, but &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/new&quot;&gt;please report&lt;/a&gt; if it causes any burden to you.&lt;/p&gt;
+
+&lt;h2&gt;Incompatible change&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  The following attributes of &lt;code&gt;CcToolchainProvider&lt;/code&gt;, which formerly were
+accessible both as fields &lt;code&gt;x.f&lt;/code&gt; and as methods &lt;code&gt;x.f()&lt;/code&gt;, are now only fields:
+&lt;code&gt;ld_executable&lt;/code&gt;, &lt;code&gt;objcopy_executable&lt;/code&gt;, &lt;code&gt;compiler_executable&lt;/code&gt;,
+&lt;code&gt;preprocessor_executable&lt;/code&gt;, &lt;code&gt;nm_executable&lt;/code&gt;, &lt;code&gt;objdump_executable&lt;/code&gt;,
+&lt;code&gt;ar_executable&lt;/code&gt;, &lt;code&gt;strip_executable&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Starlark&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;code&gt;x.f()&lt;/code&gt; is now equivalent to &lt;code&gt;y=x.f; y()&lt;/code&gt;. That is, &lt;code&gt;x.f&lt;/code&gt; should return the
+same attribute value regardless of whether it is accessed as a field or
+called like a method. Any arguments to the call are evaluated after the
+&lt;code&gt;x.f&lt;/code&gt; operation.&lt;/li&gt;
+&lt;li&gt;  Keyword-only arguments are now allowed:
+&lt;code&gt;python
+def foo(a, *, k): pass
+def foo(a, *b, k): pass
+foo(5, k = 6) # k can be specified only by keyword
+&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;  A new boolean field
+&lt;a href=&quot;https://docs.bazel.build/versions/master/skylark/lib/ctx.html#target_platform_has_constraint&quot;&gt;&lt;code&gt;ctx.target_platform_has_constraint&lt;/code&gt;&lt;/a&gt;
+is added to allow rules to check the target platform&amp;#39;s constraints.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;bazelignore&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Similar to the
+&lt;a href=&quot;https://docs.bazel.build/versions/master/guide.html#.bazelignore&quot;&gt;.bazelignore&lt;/a&gt;
+in the main repository, a .bazelignore file in external repository now
+causes the specified directories to be ignored by Bazel. Bazel doesn&amp;#39;t try to
+identify any packages under the directories, but the files can still be
+referenced in other BUILD files.&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;.bazelignore&lt;/code&gt; files now support line comments, e.g. &lt;code&gt;# this is a comment&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Android&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Experimental support for d8 merger is now available for use using
+&lt;code&gt;--define=android_dexmerger_tool=d8_dexmerger&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;RoleManager#addRoleHolderAsUser&lt;/code&gt; now supports desugaring.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Other changes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Total critical path runtime will not be longer than total execution runtime.&lt;/li&gt;
+&lt;li&gt;  A new
+&lt;a href=&quot;https://docs.bazel.build/versions/master/build-event-protocol.html&quot;&gt;&lt;code&gt;BuildEventProtocol&lt;/code&gt;&lt;/a&gt;
+message is added for listing the convenience symlinks that get created in
+the workspace (such as &lt;code&gt;bazel-out&lt;/code&gt;). Enable it with the
+&lt;code&gt;--experimental_convenience_symlinks_bep_event&lt;/code&gt; flag.&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;cquery &amp;#39;somepath(...)&amp;#39;&lt;/code&gt; returns more reliable results when the dependency has a
+different configuration than the parent. To get a result for
+&lt;code&gt;somepath(//foo, //bar)&lt;/code&gt; when &lt;code&gt;//bar&lt;/code&gt; isn&amp;#39;t in the top-level configuration,
+run your query with &lt;code&gt;--universe_scope=//foo&lt;/code&gt;. See &lt;a href=&quot;https://docs.bazel.build/versions/2.1.0/cquery.html&quot;&gt;cquery
+docs&lt;/a&gt; for details.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Community updates&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  P.J. McNerney wrote a new book:
+&lt;a href=&quot;https://www.amazon.com/Beginning-Bazel-Building-Testing-Java/dp/1484251938&quot;&gt;Beginning Bazel: Building and Testing for Java, Go, and More&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Oreilly published a report: &lt;a href=&quot;https://get.oreilly.com/ind_getting-started-with-bazel.html&quot;&gt;Getting Started with Bazel&lt;/a&gt; by Benjamin Muschko.&lt;/li&gt;
+&lt;li&gt;  &lt;code&gt;rules_nodejs&lt;/code&gt; made its &lt;a href=&quot;https://github.com/bazelbuild/rules_nodejs/releases/tag/1.0.0&quot;&gt;first stable release&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Judah Jacobson published &lt;a href=&quot;https://github.com/google/hrepl&quot;&gt;hrepl&lt;/a&gt;, a tool that lets you interactively develop Haskell code. It uses Bazel to compile your code&amp;#39;s dependencies, and then loads your modules into an interpreter.&lt;/li&gt;
+&lt;li&gt;  The &lt;a href=&quot;https://bazel.build/experts.html&quot;&gt;Bazel Community Experts&lt;/a&gt; page has been updated.&lt;/li&gt;
+&lt;li&gt;  BazelCon 2019: The &lt;a href=&quot;https://blog.bazel.build/2020/01/21/bazelcon-videos.html&quot;&gt;video recordings&lt;/a&gt; have been posted. VMWare open-source team shared their &lt;a href=&quot;https://blogs.vmware.com/opensource/2020/01/16/bazelcon-2019/&quot;&gt;First-Timer Perspective on BazelCon&lt;/a&gt;, and &lt;a href=&quot;https://www.wix.engineering/post/bazelcon-2019-lessons-learned-from-migrating-our-build-system-to-bazel&quot;&gt;Wix wrote a blog post&lt;/a&gt; about it. thundergolfer shared &lt;a href=&quot;https://www.reddit.com/r/bazel/comments/esqtnd/bazelcon_2019_notes_on_presentations/&quot;&gt;some personal notes&lt;/a&gt; about BazelCon talks.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as Adam Liddell, Alessandro Patti, Andreas Herrmann, Bor Kae Hwang, Brian Silverman, Emran BatmanGhelich, George Gensure, Jeff Palm, Jonathan Beverly, Mark Nevill, Patrick Niklaus, Peter, Ryan Beasley, Shin Yamamoto, and Yen-Chi Chen.&lt;/p&gt;
+</description>
+      <pubDate>Thu, 06 Feb 2020 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>BazelCon 2019 Videos and Birds of a Feather notes</title>
+      <link>/2020/01/21/bazelcon-videos.html</link>
+      <description>&lt;p&gt;We are truly thankful to everyone in our community for attending our annual &lt;a href=&quot;https://sites.google.com/corp/bazel.build/conference2017/2019&quot;&gt;Bazel Conference&lt;/a&gt; and making it a success! Check out the videos and Birds of a Feather session notes from the conference below:&lt;/p&gt;
+
+&lt;h2&gt;Session Videos (&lt;a href=&quot;https://www.youtube.com/playlist?list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&quot;&gt;full playlist&lt;/a&gt;)&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=eymphDN7No4&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=2&amp;t=0s&quot;&gt;Keynote: The Role of Catastrophic Failure in Software Design&lt;/a&gt;&lt;/strong&gt; – &lt;em&gt;Jeff Atwood (Stack Overflow/Discourse)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=dXhmRal9TsA&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=2&quot;&gt;Bazel State of the Union&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– John Field and Dmirty Lomov (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=Gh4SJuYUoQI&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=3&quot;&gt;Building Self Driving Cars with Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Axel Uhlig and Patrick Ziegler (BMW Group)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=BYg3fDFrTz8&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=4&quot;&gt;Moving to a Bazel-based CI system: 6 Learnings&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Or Shachar (Wix)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=eUlQnJm3NPU&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=5&quot;&gt;Bazel Federation&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Florian Weikert (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=keT8ixRS6Fk&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=6&quot;&gt;Lessons from our First 100,000 Bazel Builds&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Kevin Gessner (Etsy)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=NAPeWoimGx8&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=7&quot;&gt;Migrating Lyft-iOS to Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Keith Smiley and Dave Lee (Lyft)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=9Dk7mtIm7_A&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=8&quot;&gt;Test Selection&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Benjamin Peterson (Dropbox)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=gVdkJu3QRA4&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=9&quot;&gt;Porting iOS Apps to Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Oscar Bonilla (LinkedIn)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=q3RAOwezexU&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=24&quot;&gt;Boosting Dev Box Performance with Remote Execution for Non-Hermetic Build Engines&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Erik Mavrinac (Microsoft)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=xP6BIEUZh9Y&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=27&quot;&gt;Building on Key - Keeping your Actions and Remote Executions in Tune&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– George Gensure (UberATG)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=3w_I9ToY04s&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=26&quot;&gt;Bazel remote execution API vs Goma&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Mostyn Bramley-Moore (Vewd Software)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=21VPe7HcuPE&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=28&quot;&gt;Integrating with ease: leveraging BuildStream interaction with Bazel build for consistent results&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Daniel Silverstone (Codethink)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=fjfFe98LTm8&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=29&quot;&gt;Building Self-Driving Cars with Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Michael Broll and Nico Valigi (Cruise)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=rQv1sjLU4cI&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=30&quot;&gt;Make local development (with Bazel) great again!&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Ittai Zeidman (Wix)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=b8uR7_vReQ0&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=31&quot;&gt;Gradle to Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Chip Dickson and Charles Walker (SUM Global Technology)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;Bazel Bootcamp (&lt;a href=&quot;https://www.youtube.com/watch?v=BGOEq5FdNUQ&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=32&quot;&gt;part 1&lt;/a&gt; and &lt;a href=&quot;https://www.youtube.com/watch?v=1KbfkOWO-DY&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=33&quot;&gt;part 2&lt;/a&gt;)&lt;/strong&gt; &lt;em&gt;– Kyle Cordes (Oasis Digital)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=UwuRGpVpmbo&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=34&quot;&gt;Bazel migration patterns: how to prove business value with a small investment&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Alex Eagle and Greg Magolan (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=MF2bahnAueM&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=35&quot;&gt;Dynamic scheduling: Fastest clean and incremental builds&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Julio Merino (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=j332WfhNAFg&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=36&quot;&gt;Building a great CI with Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Philipp Wollermann (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=JsDwhNTweiQ&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=10&quot;&gt;Lightning Talk - A short overview of our company&amp;#39;s journey to sandbox Python&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Philipp Schrader (Peloton Technology)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=3DBZpahGnuI&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=12&quot;&gt;Lightning Talk - Python Dependencies the Right* Way&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Ron Rothman (Beeswax)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=-JRpuIKHIWY&amp;feature=youtu.be&quot;&gt;Lightning Talk - Creating Java based  Source Code Generators for Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Gunnar Wagenknecht (Salesforce)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=SkADnC4yFCk&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=11&quot;&gt;Lightning Talk - Bazel &amp;amp; Kubernetes:Develop like it’s production&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Steeve Morin (Zenly)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=EoYdWmMcqDs&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=13&quot;&gt;Lightning Talk - How Bazel Handles Symlinks&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Nathan Hamata (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=29xrO-XJaJs&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=14&quot;&gt;Lightning Talk - Test Result Caching at Dropbox&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Utsav Shah (Dropbox)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=s0nvBUnDqCo&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=15&quot;&gt;Lightning Talk - Bazel Eclipse Feature&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Peter Laird (Salesforce)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=c7pWF_p38bM&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=16&quot;&gt;Lightning Talk - Back to a Maven [repository]&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Simon Toens (Salesforce)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=TD1JDPD0hRA&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=17&quot;&gt;Lightning Talk - Using Bazel to build a parallel and asynchronous artifact publishing pipeline&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Liron Tal (Wix)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=uuWV501y1w4&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=18&quot;&gt;Lightning Talk - Testing Bazel’s Remote Execution API&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Josh Smith (Codethink)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=jcVvkFnK5gc&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=19&quot;&gt;Lightning Talk - Building Eclipse Plug-Ins (and OSGi Bundles) with Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Gunnar Wagenknecht (Salesforce)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=2KzOLddhdoI&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=20&quot;&gt;Lightning Talk - Why Not To Have Bazel Dependencies&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Alex Eagle, Greg Magolan (Google)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=rq5CRMaqbq0&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=21&quot;&gt;Lightning Talk - Speedy Scala Builds  with Bazel at Databricks&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Ahir Reddy (Databricks)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=2a3S3MJOa9I&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=22&quot;&gt;Lightning Talk - Bazel UI&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Paul Johnston (stack.build)&lt;/em&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=_7IIc3ZTwKk&amp;list=PLxNYxgaZ8Rsf-7g43Z8LyXct9ax6egdSj&amp;index=23&quot;&gt;Lightning Talk - Package manager integration with Bazel&lt;/a&gt;&lt;/strong&gt; &lt;em&gt;– Andreas Herrmann (Tweag)&lt;/em&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Birds of a Feather Summaries&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;/assets/BoF_2019_Java.pdf&quot;&gt;Java Session Summary&lt;/a&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;/assets/BoF_2019_iOS.pdf&quot;&gt;iOS Session Summary&lt;/a&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;/assets/BoF_2019_Python.pdf&quot;&gt;Python Session Summary&lt;/a&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;/assets/BoF_2019_FrontEnd.pdf&quot;&gt;Front End Session Summary&lt;/a&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;  &lt;strong&gt;&lt;a href=&quot;/assets/BoF_2019_C++.pdf&quot;&gt;C++ Session Summary&lt;/a&gt;&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+      <pubDate>Tue, 21 Jan 2020 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>BazelCon 2019 recap and Happy Holidays! </title>
+      <link>/2019/12/20/bazelcon-2019.html</link>
+      <description>&lt;p&gt;Last week we hosted our largest ever Bazel user conference - &lt;a href=&quot;https://conf.bazel.build/2019&quot;&gt;&lt;strong&gt;BazelCon
+2019&lt;/strong&gt;&lt;/a&gt;, an annual gathering of the community
+surrounding the Bazel build system. &lt;/p&gt;
+
+&lt;p&gt;This is the main Bazel event of the year which serves as an opportunity for
+Bazel contributors, maintainers, and users to meet and learn from each other,
+present Bazel migration stories, educate new users, and collaborate together on
+the future of Bazel.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/bazelcon-2019.png&quot; alt=&quot;BazelCon 2019&quot; class=&quot;img-responsive&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;BazelCon 2019 by the Numbers&lt;/strong&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;400+ attendees (2x increase over BazelCon 2018)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;125 organizations represented including Microsoft, Spotify, Uber, Apple,
+Cruise, EA, Lyft, Tesla, SpaceX, SAP, Bloomberg, Wix, Etsy, BMW and others&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;26 full-length talks and 15 lightning talks by members of the external
+community and Googlers&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;16 hours of Q&amp;amp;A during Office Hours with Bazel team members&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;45 Bazel Bootcamp attendees&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;5 Birds of a Feather sessions on iOS, Python, Java, C++ and Front-end Bazel
+rules&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;190+ users in the #bazelcon2019 Slack channel&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;Stay tuned for the videos of BazelCon talks and Birds of a Feather session
+notes!&lt;/strong&gt; (will be posted in January 2020)&lt;/p&gt;
+
+&lt;p&gt;On behalf of the Bazel team, we would like to THANK YOU for being a part of the
+Bazel community in 2019 and we look forward to continuing our work together in
+2020! &lt;/p&gt;
+
+&lt;p&gt;Happy Holidays!&lt;/p&gt;
+</description>
+      <pubDate>Fri, 20 Dec 2019 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Bazel 2.0</title>
+      <link>/2019/12/19/bazel-2.0.html</link>
+      <description>&lt;p&gt;A new major version of Bazel,
+&lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/2.0.0&quot;&gt;Bazel 2.0&lt;/a&gt; has just
+been released. In particular, it brings some important flag flips that did
+not make it into
+&lt;a href=&quot;https://blog.bazel.build/2019/10/10/bazel-1.0.html&quot;&gt;Bazel 1.0&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2&gt;Incompatible changes&lt;/h2&gt;
+
+&lt;p&gt;Bazel 2.0 is a new major release and brings the following incompatible changes.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/7130&quot;&gt;&lt;code&gt;--incompatible_remap_main_repo&lt;/code&gt;&lt;/a&gt;
+is enabled by default. Both ways of addressing the main repository (by its
+name and by &amp;#39;@&amp;#39;) are now considered referring to the same repository.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/9184&quot;&gt;&lt;code&gt;--incompatible_disallow_dict_lookup_unhashable_keys&lt;/code&gt;&lt;/a&gt;
+is enabled by default.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/6799&quot;&gt;&lt;code&gt;--incompatible_remove_native_maven_jar&lt;/code&gt;&lt;/a&gt;
+is now enabled by default and the flag removed.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10000&quot;&gt;&lt;code&gt;--incompatible_prohibit_aapt1&lt;/code&gt;&lt;/a&gt;
+is enabled by default.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Aquery&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Proto v2 for aquery proto output formats, which reduces the output size
+compared to v1, guarded behind the flag
+&lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10358&quot;&gt;&lt;code&gt;--incompatible_proto_output_v2&lt;/code&gt;&lt;/a&gt;.
+This proto format is still experimental and subject to further changes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Platforms&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;New incompatible flag, &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10262&quot;&gt;&lt;code&gt;--incompatible_remove_enabled_toolchain_types&lt;/code&gt;&lt;/a&gt;,
+which allows removing the &lt;code&gt;PlatformConfiguration.enabled_toolchain_types&lt;/code&gt;
+field.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Other important changes&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Package loading now consistently fails if package loading had a glob
+evaluation that encountered a symlink cycle or symlink infinite
+expansion. Previously, such package loading with such glob evaluations would
+fail only in some cases.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;The &lt;code&gt;--disk_cache&lt;/code&gt; flag can now also be used together with the gRPC remote
+cache.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;An action&amp;#39;s discover inputs runtime metrics is now categorized as parse time
+on the CriticalPathComponent.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Bazel&amp;#39;s Debian package and the binary installer now include an improved
+wrapper that understands &lt;code&gt;&amp;lt;WORKSPACE&amp;gt;/.bazelversion&lt;/code&gt; files and the
+&lt;code&gt;$USE_BAZEL_VERSION&lt;/code&gt; environment variable. This is similar to &lt;a href=&quot;https://github.com/bazelbuild/bazelisk#how-does-bazelisk-know-which-bazel-version-to-run-and-where-to-get-it-from&quot;&gt;what Bazelisk
+offers&lt;/a&gt;,
+except that it works offline and integrates with apt-get.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;We are planning to deprecate the runfiles manifest files, which aren&amp;#39;t safe in
+the presence of whitespace, and also unnecessarily require local CPU when
+remote execution is used. This release adds
+&lt;code&gt;--experimental_skip_runfiles_manifests&lt;/code&gt; to disable the generation of the
+input manifests (rule.manifest files) in most cases. This can be used for
+initial testing, but the exact semantics are still subject to change; let us
+know if this is causing problems. Note that this flag has no effect on Windows
+by default or if &lt;code&gt;--experimental_enable_runfiles&lt;/code&gt; is explicitly set to false.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Community&lt;/h2&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as
+aldersondrive, Benjamin Peterson, Bor Kae Hwang, David Ostrovsky, John Millikin,
+Keith Smiley, Lauri Peltonen, nikola-sh, Peter Mounce, Tony Hsu.&lt;/p&gt;
+</description>
+      <pubDate>Thu, 19 Dec 2019 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Bazel 1.2</title>
+      <link>/2019/11/20/bazel-1.2.0.html</link>
+      <description>&lt;p&gt;We&amp;#39;ve just released &lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/1.2.0&quot;&gt;Bazel 1.2&lt;/a&gt;!&lt;/p&gt;
+
+&lt;p&gt;Bazel 1.2 is intended to be &lt;a href=&quot;https://docs.bazel.build/versions/master/backward-compatibility.html&quot;&gt;backward-compatible&lt;/a&gt; with Bazel 1.0.&lt;/p&gt;
+
+&lt;p&gt;Please &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/new&quot;&gt;report&lt;/a&gt; any update problems.&lt;/p&gt;
+
+&lt;h2&gt;Android&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;android_binary&lt;/code&gt; and &lt;code&gt;android_library&lt;/code&gt; can now depend on targets providing &lt;code&gt;CcInfos&lt;/code&gt;. See &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/9079&quot;&gt;#9079&lt;/a&gt; for details.&lt;/li&gt;
+&lt;li&gt;Experimental support for d8 dexers (both standalone and incremental) is now available for use using &lt;code&gt;--nouse_workers_with_dexbuilder&lt;/code&gt; &lt;code&gt;--define=android_incremental_dexing_tool=d8_dexbuilder&lt;/code&gt;. See &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/5150&quot;&gt;#5150&lt;/a&gt; for details.&lt;/li&gt;
+&lt;li&gt;Added Desugar support for &lt;code&gt;FreezePeriod#&amp;lt;init&amp;gt;&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Query&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fixed an aquery bug with handling malformed queries that crashes Bazel.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;macOS / iOS&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fixed &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10184&quot;&gt;a bug&lt;/a&gt; that broke caching for all builds on macOS.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;C++&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The &lt;code&gt;cc_common.{compile,link}&lt;/code&gt; APIs can now be used without passing the &lt;code&gt;--experimental_cc_skylark_api_enabled_packages&lt;/code&gt; flag.&lt;/li&gt;
+&lt;li&gt;Incompatible flag &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10047&quot;&gt;&lt;code&gt;--incompatible_validate_top_level_header_inclusions&lt;/code&gt;&lt;/a&gt; has been added.&lt;/li&gt;
+&lt;li&gt;Fields on &lt;code&gt;CcLinkingOutputs&lt;/code&gt; are now listed.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Platforms&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;--target_platform_fallback&lt;/code&gt; now also applies to exec / host configurations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Python&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Added flag &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/10076&quot;&gt;&lt;code&gt;--incompatible_default_to_explicit_init_py&lt;/code&gt;&lt;/a&gt; to switch the default value of &lt;a href=&quot;https://docs.bazel.build/versions/master/be/python.html#py_binary.legacy_create_init&quot;&gt;&lt;code&gt;legacy_create_init&lt;/code&gt;&lt;/a&gt; to False. With this flag enabled, your &lt;code&gt;py_binary&lt;/code&gt; and &lt;code&gt;py_test&lt;/code&gt; targets will no longer behave as if empty &lt;code&gt;__init__.py&lt;/code&gt; files were implicitly littered in your runfiles tree.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Documentation and UX&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bazel will now prevent idle sleep during test and build actions. Note that this does not affect screensavers and will not keep a laptop awake if the user forces sleep or closes the lid. This is purely to avoid idle sleeping when the user is not interacting with the device.&lt;/li&gt;
+&lt;li&gt;Added support for tracking suspensions (sleeps or SIGSTOP) on macOS.&lt;/li&gt;
+&lt;li&gt;BUILD/.bzl execution errors now cause execution to stop, even at top-level.&lt;/li&gt;
+&lt;li&gt;A list of log paths will now be provided in the build output.&lt;/li&gt;
+&lt;li&gt;Improved &lt;a href=&quot;https://docs.bazel.build/versions/master/skylark/rules.html#runfiles&quot;&gt;runfiles documentation&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Community updates&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Ignacio Le Fluk explained how to do &lt;a href=&quot;https://dev.to/thisdotmedia/fullstack-development-with-bazel-16ic&quot;&gt;Fullstack development with Bazel&lt;/a&gt;, using Javascript and Typescript.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Sergio Fernández wrote about &lt;a href=&quot;https://medium.com/@fdzsergio/building-faster-in-ios-with-bazel-448a3074e73&quot;&gt;Building Faster in iOS with Bazel&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Ahir Reddy and Li Haoyi did a presentation at Scale By The Bay 2019: &lt;a href=&quot;https://www.youtube.com/watch?v=fs-TkRkFgDI&quot;&gt;Speedy Scala Builds at Databricks&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Nathan Froyd is evaluating Bazel for building Firefox (&lt;a href=&quot;https://blog.mozilla.org/nfroyd/2019/10/28/evaluating-bazel-for-building-firefox-part-1/&quot;&gt;part 1&lt;/a&gt;, &lt;a href=&quot;https://blog.mozilla.org/nfroyd/2019/11/01/evaluating-bazel-for-building-firefox-part-2/&quot;&gt;part 2&lt;/a&gt;).&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Oasis Digital has announced new 3-day trainings &lt;a href=&quot;https://oasisdigital.com/class/bazel&quot;&gt;Building with Bazel&lt;/a&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as Alex Kirchhoff, Andrew Suffield, Asaf Flescher, Austin Schuh, Benjamin Peterson, Bor Kae Hwang, Brian Richardson, Christy Norman, Clint Harrison, Dan Halperin, Daniel Martín, Dave Lee, David Neil, David Ostrovsky, George Gensure, Greg, Jacob Parker, Jakub Bujny, John Millikin, Keith Smiley, marcohu, Marwan Tammam, Mostyn Bramley-Moore, Peter Mounce, Ruben Das, Stepan Koltsov, Thi Don, Thi, Tomasz Strejczek, Walt Panfil, Yannic Bonenberger, Zackary Lowery.&lt;/p&gt;
+</description>
+      <pubDate>Wed, 20 Nov 2019 00:00:00 +0800</pubDate>
+    </item>
+  
+    <item>
+      <title>Bazel 1.1</title>
+      <link>/2019/10/21/bazel-1.1.0.html</link>
+      <description>&lt;p&gt;We’ve just released &lt;a href=&quot;https://github.com/bazelbuild/bazel/releases/tag/1.1.0&quot;&gt;Bazel 1.1&lt;/a&gt;!
+Bazel 1.1 is intended to be &lt;a href=&quot;https://docs.bazel.build/versions/master/backward-compatibility.html&quot;&gt;backward-compatible&lt;/a&gt; with Bazel 1.0.&lt;/p&gt;
+
+&lt;p&gt;Please &lt;a href=&quot;https://github.com/bazelbuild/bazel/issues/new&quot;&gt;report&lt;/a&gt; any update problems.&lt;/p&gt;
+
+&lt;h2&gt;Query&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The query flag &lt;code&gt;--host_deps&lt;/code&gt; (commonly used as &lt;code&gt;--nohost_deps&lt;/code&gt;) has been renamed to &lt;a href=&quot;https://docs.bazel.build/versions/master/cquery.html#tool_deps-boolean-default-true&quot;&gt;&lt;code&gt;--tool_deps&lt;/code&gt;&lt;/a&gt;, and now also removes dependencies in any execution configuration from being reported in the query output. The previous flag name is deprecated and will be removed in a future release.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Starlark&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Small adjustments in error reporting. Errors during code evaluation will cause the execution to stop (the following errors were often misleading). Multiple validation errors can now be reported.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;Community&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;  Ignacio Le Fluk wrote an article about &lt;a href=&quot;https://dev.to/thisdotmedia/angular-bazel-getting-ready-4b0i&quot;&gt;using Bazel with the Angular CLI&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Tweag.io published two articles: &lt;a href=&quot;https://www.tweag.io/posts/2019-10-09-bazel-cabal-stack.html&quot;&gt;Bazel, Cabal, Stack: Why choose when you can have them all?&lt;/a&gt; and &lt;a href=&quot;https://www.tweag.io/posts/2019-09-25-bazel-ghc-persistent-worker-internship.html&quot;&gt;Bazel&amp;#39;s persistent worker mode for GHC&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Юра Панарин wrote about &lt;a href=&quot;https://medium.com/@tduble94/create-go-monorepo-with-go-modules-and-bazel-95f00cf571d3&quot;&gt;Creating Go Monorepo with Go-modules and Bazel&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Wassim Chegham explains how to &lt;a href=&quot;https://dev.to/azure/build-azure-function-apps-with-bazel-1-0-mci&quot;&gt;Build Your Serverless Azure Function Apps With Bazel&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Alex Eagle wrote a tutorial for &lt;a href=&quot;https://dev.to/jakeherringbone/layering-in-bazel-for-web-389h&quot;&gt;Layering in Bazel for Web&lt;/a&gt; with an example project.&lt;/li&gt;
+&lt;li&gt;  If you’re interested in using Bazel on Gitlab CI, read &lt;a href=&quot;https://medium.com/@bamnet/using-bazel-on-gitlab-ci-fe59cad2db50&quot;&gt;Brian Michalski’s article&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Laurence Urhegyi wrote about &lt;a href=&quot;https://www.codethink.co.uk/articles/2019/testing-bazels-remote-execution-api/&quot;&gt;Testing Bazel&amp;#39;s Remote Execution API&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;  Ryan Martens gave a talk &lt;a href=&quot;https://www.youtube.com/watch?v=2-2Z9TlFGjo&amp;feature=youtu.be&quot;&gt;“Build and Test like Google”&lt;/a&gt; at the North America Google Developer Experts Summit.&lt;/li&gt;
+&lt;li&gt;  Dan Garfield talked about &lt;a href=&quot;https://www.youtube.com/watch?v=0G2Vk-eMEYE&quot;&gt;Using Multi-Stage Docker, Go, Java,&amp;amp; Bazel to DESTORY Long Build Times&lt;/a&gt; on DevOpsTV.&lt;/li&gt;
+&lt;li&gt;  Chris Love and Tamao Nakahara discussed &lt;a href=&quot;https://www.youtube.com/watch?v=Tl6Bj6dQicI&quot;&gt;Streamlining Kubernetes Application CI/CD with Bazel&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This release contains contributions from many people at Google, as well as Andrew Suffield, Austin Schuh, Bor Kae Hwang, Brian Richardson, Christy Norman, Clint Harrison, Dan Halperin, Dave Lee, David Neil, David Ostrovsky, George Gensure, Greg, Jacob Parker, Jakub Bujny, John Millikin, Keith Smiley, marcohu, Marwan Tammam, Mostyn Bramley-Moore, Stepan Koltsov, Thi Don, Thi, Tomasz Strejczek.&lt;/p&gt;
+</description>
+      <pubDate>Mon, 21 Oct 2019 00:00:00 +0800</pubDate>
+    </item>
+  
+</channel>
+
+</rss>
